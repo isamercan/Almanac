@@ -1,0 +1,7 @@
+# Swift Package Index configuration — builds & hosts DocC for Almanac.
+# https://swiftpackageindex.com/swiftpackageindex/spimanifest/documentation
+version: 1
+builder:
+  configs:
+    - documentation_targets: [Almanac]
+      platform: ios

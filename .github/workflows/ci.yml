@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build & Test (iOS Simulator)
+    runs-on: macos-14
+    env:
+      SIM: platform=iOS Simulator,name=iPhone 15
+      # Forwarded into the test runner as `CI` → SnapshotTests skip (references are OS-specific).
+      TEST_RUNNER_CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Test Almanac
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme Almanac \
+            -destination "$SIM" \
+            -resultBundlePath Almanac.xcresult
+
+      - name: Build CalendarDemo app
+        working-directory: Demo
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -scheme CalendarDemo \
+            -project calendar-ios.xcodeproj \
+            -destination "$SIM" \
+            CODE_SIGNING_ALLOWED=NO
+
+  lint:
+    name: SwiftLint
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run SwiftLint (if available)
+        run: |
+          if command -v swiftlint >/dev/null 2>&1; then
+            swiftlint --strict
+          else
+            echo "SwiftLint not installed on the runner; skipping. (brew install swiftlint to enable)"
+          fi

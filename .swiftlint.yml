@@ -1,0 +1,47 @@
+# SwiftLint configuration for calendar-ios.
+# Run `swiftlint` from the calendar-ios directory.
+
+included:
+  - Sources
+  - Tests
+  - Demo/CalendarDemo
+  - Demo/CalendarDemoUITests
+
+excluded:
+  - "**/.build"
+  - "**/DerivedData"
+
+# The codebase uses 2-space indentation and occasionally long, descriptive lines.
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+type_body_length:
+  warning: 400
+  error: 600
+
+file_length:
+  warning: 500
+  error: 800
+
+function_body_length:
+  warning: 80
+  error: 140
+
+identifier_name:
+  min_length: 2          # allow short names like `r`, `s`, `d` used in tight date math
+  excluded: [id, x, y, z, a, r, g, b]
+
+disabled_rules:
+  - todo
+  - trailing_comma        # multiline trailing commas are used intentionally
+
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+  - explicit_init
+  - first_where
+  - sorted_first_last
+  - contains_over_first_not_nil

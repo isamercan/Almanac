@@ -1,0 +1,23 @@
+/* English */
+"etscalendar_clear" = "Clear";
+"etscalendar_action_apply" = "Apply";
+"etscalendar_select_date_prompt" = "Select Date";
+"etscalendar_back" = "Back";
+"etscalendar_clear_return_date" = "Clear return date";
+"etscalendar_close" = "Close";
+"etscalendar_departure_date" = "Departure Date";
+"etscalendar_add_return" = "Add Return";
+"etscalendar_rentacar_pickup_date_title" = "Pick Up Date";
+"etscalendar_rentacar_drop_off_date_title" = "Drop Off Date";
+"etscalendar_hotel_checkin_date_title" = "Check-In Date";
+"etscalendar_hotel_checkout_date_title" = "Check-Out Date";
+
+"etscalendar_a11y_today" = "Today";
+"etscalendar_a11y_selected_start" = "Selected start date";
+"etscalendar_a11y_selected_end" = "Selected end date";
+"etscalendar_a11y_selected_single" = "Selected date";
+"etscalendar_a11y_in_range" = "In selected range";
+"etscalendar_a11y_unavailable" = "Unavailable";
+"etscalendar_a11y_hour" = "Hour";
+"etscalendar_a11y_minute" = "Minute";
+"etscalendar_a11y_ampm" = "AM/PM";

@@ -1,0 +1,23 @@
+/* Türkçe (varsayılan) */
+"etscalendar_clear" = "Temizle";
+"etscalendar_action_apply" = "Uygula";
+"etscalendar_select_date_prompt" = "Tarih Seçin";
+"etscalendar_back" = "Geri";
+"etscalendar_clear_return_date" = "Dönüş tarihini temizle";
+"etscalendar_close" = "Kapat";
+"etscalendar_departure_date" = "Gidiş Tarihi";
+"etscalendar_add_return" = "Dönüş Ekle";
+"etscalendar_rentacar_pickup_date_title" = "Alış Tarihi";
+"etscalendar_rentacar_drop_off_date_title" = "İade Tarihi";
+"etscalendar_hotel_checkin_date_title" = "Giriş Tarihi";
+"etscalendar_hotel_checkout_date_title" = "Çıkış Tarihi";
+
+"etscalendar_a11y_today" = "Bugün";
+"etscalendar_a11y_selected_start" = "Seçili başlangıç tarihi";
+"etscalendar_a11y_selected_end" = "Seçili bitiş tarihi";
+"etscalendar_a11y_selected_single" = "Seçili tarih";
+"etscalendar_a11y_in_range" = "Seçili aralıkta";
+"etscalendar_a11y_unavailable" = "Seçilemez";
+"etscalendar_a11y_hour" = "Saat";
+"etscalendar_a11y_minute" = "Dakika";
+"etscalendar_a11y_ampm" = "ÖÖ/ÖS";

@@ -1,0 +1,23 @@
+/* العربية (RTL) */
+"etscalendar_clear" = "مسح";
+"etscalendar_action_apply" = "تطبيق";
+"etscalendar_select_date_prompt" = "اختر التاريخ";
+"etscalendar_back" = "رجوع";
+"etscalendar_clear_return_date" = "مسح تاريخ العودة";
+"etscalendar_close" = "إغلاق";
+"etscalendar_departure_date" = "تاريخ المغادرة";
+"etscalendar_add_return" = "إضافة عودة";
+"etscalendar_rentacar_pickup_date_title" = "تاريخ الاستلام";
+"etscalendar_rentacar_drop_off_date_title" = "تاريخ التسليم";
+"etscalendar_hotel_checkin_date_title" = "تاريخ الوصول";
+"etscalendar_hotel_checkout_date_title" = "تاريخ المغادرة";
+
+"etscalendar_a11y_today" = "اليوم";
+"etscalendar_a11y_selected_start" = "تاريخ البدء المحدد";
+"etscalendar_a11y_selected_end" = "تاريخ الانتهاء المحدد";
+"etscalendar_a11y_selected_single" = "التاريخ المحدد";
+"etscalendar_a11y_in_range" = "ضمن النطاق المحدد";
+"etscalendar_a11y_unavailable" = "غير متاح";
+"etscalendar_a11y_hour" = "ساعة";
+"etscalendar_a11y_minute" = "دقيقة";
+"etscalendar_a11y_ampm" = "ص/م";
