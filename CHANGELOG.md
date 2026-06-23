@@ -27,6 +27,13 @@ All notable changes to Almanac are documented here. Format follows
 - **i18n** — tr (default), en, ar (RTL).
 - Image snapshot tests, XCUITests, unit tests, GitHub Actions CI, SwiftLint config, DocC catalog.
 
+### Demo
+- **Calendar Library example gallery** — the demo app now ships an "Examples" gallery (13 screens)
+  re-creating the kizitonwose Calendar sample app on top of Almanac's public API: horizontal/paged,
+  Airbnb-style range (plus the modern "highlight" variant), single-select flight calendar,
+  custom-styled month, week calendars (paged / continuous), a GitHub-style heat map, month↔week
+  toggle (plus an AnimatedVisibility variant), and horizontal/vertical year calendars.
+
 ### Performance
 - Cached the Gregorian `Calendar` and locale-keyed `DateFormatter`s (previously re-allocated per call).
 

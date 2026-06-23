@@ -38,6 +38,8 @@ struct DemoMenuView: View {
   @State private var sundayStart = false
   @State private var hideChrome = false
   @State private var resultText: String?
+  /// Deep-links straight to a gallery example (for screenshots / headless verification).
+  @State private var autoExample: CalendarExample?
 
   private var configuration: CalendarPickerConfiguration {
     CalendarPickerConfiguration(
@@ -100,6 +102,11 @@ struct DemoMenuView: View {
             .accessibilityIdentifier("menu.styled")
         }
 
+        Section("Calendar Library Örnekleri") {
+          NavigationLink("Tüm Örnekler (13)") { ExamplesListView() }
+            .accessibilityIdentifier("menu.examples")
+        }
+
         Section("Görünüm") {
           NavigationLink("Yıl Görünümü (2026)") {
             YearOverviewDemoView(configuration: configuration)
@@ -128,6 +135,9 @@ struct DemoMenuView: View {
       if env["DEMO_HORIZONTAL"] == "1" { horizontal = true }
       if env["DEMO_SUNDAY"] == "1" { sundayStart = true }
       if env["DEMO_NOCHROME"] == "1" { hideChrome = true }
+      if let n = env["DEMO_EXAMPLE"], let i = Int(n), let ex = CalendarExample(rawValue: i) {
+        autoExample = ex
+      }
       switch env["DEMO_AUTOPRESENT"] {
       case "range": showRange = true
       case "hotel": showHotel = true
@@ -140,6 +150,12 @@ struct DemoMenuView: View {
       case "chrome": showChromeDemo = true
       case "hijri": showHijri = true
       default: break
+      }
+    }
+    .fullScreenCover(item: $autoExample) { example in
+      NavigationStack {
+        example.destination
+          .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Kapat") { autoExample = nil } } }
       }
     }
     .fullScreenCover(isPresented: $showHijri) {
