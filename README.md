@@ -5,8 +5,8 @@
 **A fully-configurable SwiftUI date-range calendar for iOS** — range & single selection, holidays,
 price badges, dark mode, RTL, any `Calendar` (Gregorian, Hijri…), and a live design configurator.
 
-[![Swift](https://img.shields.io/badge/Swift-5.9%2B-orange.svg)](https://swift.org)
-[![Platforms](https://img.shields.io/badge/iOS-17%2B-blue.svg)](https://developer.apple.com/ios/)
+[![Swift Package Index](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fisamercan%2FAlmanac%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/isamercan/Almanac)
+[![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fisamercan%2FAlmanac%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/isamercan/Almanac)
 [![SPM](https://img.shields.io/badge/SwiftPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![License](https://img.shields.io/badge/license-MIT-black.svg)](LICENSE)
 [![CI](https://github.com/isamercan/Almanac/actions/workflows/ci.yml/badge.svg)](https://github.com/isamercan/Almanac/actions)
