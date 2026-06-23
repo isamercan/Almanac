@@ -5,6 +5,10 @@ All notable changes to Almanac are documented here. Format follows
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.1.0] - 2026-06-23
+
 ### Added
 - **CalendarRangePickerView** — full date-range picker (top bar + grid + footer) with Apply/Cancel.
 - **CalendarGridView** — bare scrolling month grid (no chrome) for embedding.

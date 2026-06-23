@@ -97,6 +97,36 @@ Everything beyond plain range selection is additive and opt-in — the stock def
 - **Tests & tooling** — unit tests, image snapshot tests, XCUITests, GitHub Actions CI, SwiftLint
   config, DocC catalog.
 
+## Examples
+
+The demo app ships a **Calendar Library example gallery** (13 screens) re-creating the
+[kizitonwose Calendar](https://github.com/kizitonwose/Calendar) sample app entirely on Almanac's
+public API — open *Calendar Library Örnekleri → Tüm Örnekler* in the demo.
+
+<table>
+  <tr>
+    <td><img src="Docs/Screenshots/example-horizontal.png" width="200" alt="Horizontal, paged"></td>
+    <td><img src="Docs/Screenshots/example-week.png" width="200" alt="Week calendar"></td>
+    <td><img src="Docs/Screenshots/example-heatmap.png" width="200" alt="Heat map"></td>
+    <td><img src="Docs/Screenshots/example-year.png" width="200" alt="Year calendar"></td>
+  </tr>
+</table>
+
+| # | Example | Built with |
+|---|---|---|
+| 1 | Horizontal, paged, programmatic scroll | `CalendarGridView` + `CalendarController` |
+| 2 | Vertical Airbnb-style range, past disabled | `CalendarRangePickerView` |
+| 3 | Horizontal single-select flight calendar | `.single` + `priceByDate` |
+| 4 | Custom design + custom month header | `CalendarStyle` + `.calendarMonthHeader` |
+| 5 / 7 | Week calendar (paged / continuous) | themed SwiftUI strip |
+| 6 | GitHub-style heat map | `CalendarGridView` + `.calendarDay` |
+| 8 | Fullscreen horizontal picker | `horizontalPaging` + chrome |
+| 9 | Animated month ↔ week toggle | grid ↔ strip transitions |
+| 10 / 11 | Year calendar (horizontal / vertical) | `CalendarYearView` |
+
+Plus the two upstream variants: **2 · Highlight** (modern Airbnb continuous-selection bar) and
+**9 · Animated** (month ↔ week via `AnimatedVisibility`).
+
 ## Dependencies (SPM)
 
 - [Airbnb HorizonCalendar](https://github.com/airbnb/HorizonCalendar) `2.0.0` — the scrolling
@@ -187,6 +217,17 @@ CalendarRangePickerView.rangeSelector(configuration: config, onApply: { _ in })
 ```
 
 The standalone drum time pickers are `TimeWheel24` and `TimeWheelAmPm`.
+
+## Documentation
+
+Full API documentation (DocC) is hosted on the
+[Swift Package Index](https://swiftpackageindex.com/isamercan/Almanac/documentation/almanac).
+Start with [`CalendarRangePickerView`](https://swiftpackageindex.com/isamercan/Almanac/documentation/almanac/calendarrangepickerview)
+and [`CalendarPickerConfiguration`](https://swiftpackageindex.com/isamercan/Almanac/documentation/almanac/calendarpickerconfiguration).
+
+## Contributing
+
+Issues and PRs are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and the [ROADMAP](ROADMAP.md).
 
 ## License
 
