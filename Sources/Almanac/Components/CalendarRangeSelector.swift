@@ -79,7 +79,7 @@ struct CalendarRangeSelector: View {
     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
   }
 
-  @ViewBuilder
+  @MainActor @ViewBuilder
   private func weekdayHeaderView(_ weekdayIndex: Int) -> some View {
     if !viewModel.showsWeekdayHeader {
       Color.clear.frame(height: 0)
@@ -90,7 +90,7 @@ struct CalendarRangeSelector: View {
     }
   }
 
-  @ViewBuilder
+  @MainActor @ViewBuilder
   private func dayView(for day: DayComponents) -> some View {
     let date = CalDate(year: day.month.year, month: day.month.month, day: day.day)
     let state = viewModel.dayState(for: date)
@@ -117,7 +117,7 @@ struct CalendarRangeSelector: View {
   }
 
   /// Composes a VoiceOver label: full date + selection/today/holiday state.
-  private func accessibilityLabel(date: CalDate, state: DayCellState) -> String {
+  @MainActor private func accessibilityLabel(date: CalDate, state: DayCellState) -> String {
     let locale = viewModel.locale
     var parts = [CalendarFormatting.longDate(date, locale: locale, calendar: viewModel.calendar)]
     if state.isToday { parts.append(L10n.string(L10n.Key.a11yToday, locale: locale)) }

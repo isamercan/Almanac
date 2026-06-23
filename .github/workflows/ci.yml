@@ -11,16 +11,31 @@ concurrency:
 jobs:
   test:
     name: Build & Test (iOS Simulator)
-    runs-on: macos-14
+    runs-on: macos-15
     env:
-      SIM: platform=iOS Simulator,name=iPhone 15
       # Forwarded into the test runner as `CI` → SnapshotTests skip (references are OS-specific).
       TEST_RUNNER_CI: "1"
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      # The demo project uses Xcode 16 file-system synchronized groups (objectVersion 77) and the
+      # library relies on Swift 6 main-actor inference, so pin a modern Xcode.
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Show versions
+        run: |
+          xcodebuild -version
+          swift --version
+
+      # Device names differ by Xcode (iPhone 16 vs 17 …), so pick the newest available iPhone.
+      - name: Pick a simulator
+        run: |
+          DEVICE=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9]+' | sort -V | uniq | tail -1)
+          echo "Selected simulator: $DEVICE"
+          echo "SIM=platform=iOS Simulator,name=$DEVICE" >> "$GITHUB_ENV"
 
       - name: Test Almanac
         run: |
