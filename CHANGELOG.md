@@ -5,6 +5,10 @@ All notable changes to Almanac are documented here. Format follows
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.2.0] - 2026-06-25
+
 ### Added
 - **CalendarWeekView** — a first-class paged week strip (one row of 7 days at a time). Shares the
   month grid's `CalendarScreenViewModel` + `CalendarDayIndicator`, so range/single selection,
