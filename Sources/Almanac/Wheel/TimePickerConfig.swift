@@ -13,6 +13,9 @@ public struct TimePickerConfig {
   public var textColor: Color = CalendarColors.ink
   /// Alpha = (1 − |angle| / (π/2))^fadingPower. Default 4 for a smooth fade.
   public var fadingPower: CGFloat = 4
+  /// Whether a selection-feedback tick fires as a value crosses the wheel center. Default true.
+  /// Set to false to silence the drum (parity with the calendar's `hapticsEnabled`).
+  public var hapticsEnabled: Bool = true
 
   // Parity-only physics knobs (see note above).
   public var snapStiffness: CGFloat = 1

@@ -51,7 +51,7 @@ struct WheelColumn: View {
     }
     .onChange(of: scrollID) { _, newValue in
       guard let idx = newValue else { return }
-      Haptics.wheelTick()       // tick on every center crossing, including while scrolling
+      if config.hapticsEnabled { Haptics.wheelTick() }   // tick on every center crossing, including while scrolling
       scheduleSettle(idx)
     }
     // VoiceOver: expose the column as a single adjustable element instead of a scroll of labels.

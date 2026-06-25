@@ -11,6 +11,9 @@
 "etscalendar_rentacar_drop_off_date_title" = "İade Tarihi";
 "etscalendar_hotel_checkin_date_title" = "Giriş Tarihi";
 "etscalendar_hotel_checkout_date_title" = "Çıkış Tarihi";
+"etscalendar_today" = "Bugün";
+"etscalendar_year_overview" = "Yıl";
+"etscalendar_months" = "Aylar";
 
 "etscalendar_a11y_today" = "Bugün";
 "etscalendar_a11y_selected_start" = "Seçili başlangıç tarihi";

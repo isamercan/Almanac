@@ -19,6 +19,9 @@ enum L10n {
     static let rentacarDropOff = "etscalendar_rentacar_drop_off_date_title"
     static let hotelCheckin = "etscalendar_hotel_checkin_date_title"
     static let hotelCheckout = "etscalendar_hotel_checkout_date_title"
+    static let today = "etscalendar_today"
+    static let yearOverview = "etscalendar_year_overview"
+    static let months = "etscalendar_months"
 
     // VoiceOver state words for day cells.
     static let a11yToday = "etscalendar_a11y_today"

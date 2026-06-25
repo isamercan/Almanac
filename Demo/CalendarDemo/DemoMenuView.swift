@@ -37,6 +37,7 @@ struct DemoMenuView: View {
   @State private var horizontal = false
   @State private var sundayStart = false
   @State private var hideChrome = false
+  @State private var showTodayButton = false
   @State private var resultText: String?
   /// Deep-links straight to a gallery example (for screenshots / headless verification).
   @State private var autoExample: CalendarExample?
@@ -56,7 +57,8 @@ struct DemoMenuView: View {
       selectionMode: singleDate ? .single : .range,
       horizontalPaging: horizontal,
       calendar: demoCalendar,
-      chrome: CalendarChrome(showsWeekdayHeader: !hideChrome, showsLegend: !hideChrome))
+      chrome: CalendarChrome(
+        showsWeekdayHeader: !hideChrome, showsLegend: !hideChrome, showsTodayButton: showTodayButton))
   }
 
   private var demoCalendar: Calendar {
@@ -89,6 +91,7 @@ struct DemoMenuView: View {
           Toggle("Yatay sayfalama", isOn: $horizontal)
           Toggle("Pazar başlangıç", isOn: $sundayStart)
           Toggle("Başlık/legend gizle", isOn: $hideChrome)
+          Toggle("Bugün butonu", isOn: $showTodayButton)
         }
 
         Section("Takvim") {
@@ -108,6 +111,14 @@ struct DemoMenuView: View {
         }
 
         Section("Görünüm") {
+          NavigationLink("Browse (Yıl ↔ Ay) + Tema + Accessory") {
+            BrowseDemoView(configuration: configuration)
+          }
+          .accessibilityIdentifier("menu.browse")
+          NavigationLink("Hafta Takvimi (CalendarWeekView)") {
+            WeekCalendarDemoView(configuration: configuration)
+          }
+          .accessibilityIdentifier("menu.week")
           NavigationLink("Yıl Görünümü (2026)") {
             YearOverviewDemoView(configuration: configuration)
           }

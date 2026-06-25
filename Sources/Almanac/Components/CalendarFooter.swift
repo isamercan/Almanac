@@ -7,6 +7,12 @@ struct FooterHeightKey: PreferenceKey {
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
+/// Reports the selected-date accessory's measured height (0 when absent); added to the bottom inset.
+struct AccessoryHeightKey: PreferenceKey {
+  static let defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
 /// Bottom panel: animated legend + Clear/Apply buttons. /// — rounded top corners, shadow, pill buttons. It sits within the bottom
 /// safe area; the screen's background fills the area beneath it (home-indicator zone).
 struct CalendarFooter: View {

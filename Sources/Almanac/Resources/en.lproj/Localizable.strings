@@ -11,6 +11,9 @@
 "etscalendar_rentacar_drop_off_date_title" = "Drop Off Date";
 "etscalendar_hotel_checkin_date_title" = "Check-In Date";
 "etscalendar_hotel_checkout_date_title" = "Check-Out Date";
+"etscalendar_today" = "Today";
+"etscalendar_year_overview" = "Year";
+"etscalendar_months" = "Months";
 
 "etscalendar_a11y_today" = "Today";
 "etscalendar_a11y_selected_start" = "Selected start date";

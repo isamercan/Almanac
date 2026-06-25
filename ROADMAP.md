@@ -3,6 +3,11 @@
 Directional, not a promise — order and scope may change. Ideas and PRs welcome (open an issue or a
 discussion first for anything large).
 
+## Shipped since 0.1.0 (unreleased)
+See the [CHANGELOG](CHANGELOG.md) for details: `CalendarWeekView`, `CalendarBrowseView` (year ↔ month),
+multi-year `CalendarYearView`, theme presets (`CalendarThemePreset`), an opt-in "jump to today" button,
+and `.calendarSelectedDateAccessory`.
+
 ## 0.1.x — polish
 - [ ] Deterministic snapshot tests on CI (currently skipped via the `CI` env; explore tolerance-based
       comparison or a pinned simulator/OS so they can run in the matrix).
@@ -10,8 +15,8 @@ discussion first for anything large).
 - [ ] DocC: more article-level guides (theming, composition, calendars) beyond symbol docs.
 
 ## 0.2.0 — capabilities
-- [ ] **Week calendar as a first-class layout** (today the demo's week screens are plain SwiftUI;
-      promote a real `WeekCalendarView` into the library).
+- [x] **Week calendar as a first-class layout** — shipped as `CalendarWeekView` (paged week strip
+      sharing the month grid's selection engine + day cell).
 - [ ] **Multiple / arbitrary date selection** mode (beyond range / single).
 - [ ] **macOS / Mac Catalyst** support (audit UIKit-only paths; gate haptics & hosting bridge).
 - [ ] Month/week toggle helper in the library (the demo's Example 9 pattern, packaged).

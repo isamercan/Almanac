@@ -5,7 +5,29 @@ All notable changes to Almanac are documented here. Format follows
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **CalendarWeekView** — a first-class paged week strip (one row of 7 days at a time). Shares the
+  month grid's `CalendarScreenViewModel` + `CalendarDayIndicator`, so range/single selection,
+  holidays, price badges, blocked/min-max rules, theming and accessibility match exactly. Honours the
+  injected `Calendar` + `firstWeekday`; page programmatically via `CalendarController`.
+- **CalendarBrowseView** — a year ↔ month browse surface: a (multi-)year overview where tapping a
+  month zooms into the scrolling grid, plus a header toggle back to the overview. Live selection is
+  reported via `onSelectionChange`.
+- **Multi-year `CalendarYearView`** — new `init(years:calendar:locale:)` renders a scrollable span of
+  years with per-year titles; the single-year `init` gains a `calendar:` parameter.
+- **Theme presets** — `CalendarThemePreset` (`.standard`, `.ocean`, `.sunset`, `.forest`, `.midnight`,
+  with `displayName`s) plus matching `CalendarTheme.ocean` / `.sunset` / `.forest` / `.midnight` statics.
+  `.standard` is untouched, so the stock look is unchanged.
+- **"Jump to today" button** — opt-in `CalendarChrome.showsTodayButton` floating affordance over the
+  grid (off by default, including in `.full`).
+- **`.calendarSelectedDateAccessory`** — supply a detail view rendered above the footer for the
+  currently selected day (the range end if set, else the start).
+- **`TimePickerConfig.hapticsEnabled`** — opt out of the time-wheel tick haptic.
+
+### Fixed
+- `CalendarYearView` mini-months no longer hardcode the Gregorian calendar: blank-cell offsets, day
+  counts, month names and year titles now honour the injected `Calendar` + `firstWeekday`, so
+  non-Gregorian calendars (e.g. Hijri) lay out correctly.
 
 ## [0.1.0] - 2026-06-23
 
