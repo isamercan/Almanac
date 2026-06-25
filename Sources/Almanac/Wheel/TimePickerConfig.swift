@@ -28,7 +28,8 @@ public struct TimePickerConfig {
     fontSize: CGFloat = 23,
     fontWeight: Font.Weight = .light,
     textColor: Color = CalendarColors.ink,
-    fadingPower: CGFloat = 4)
+    fadingPower: CGFloat = 4,
+    hapticsEnabled: Bool = true)
   {
     precondition(visibleItems % 2 == 1, "visibleItems must be an odd integer!")
     self.itemHeight = itemHeight
@@ -37,6 +38,7 @@ public struct TimePickerConfig {
     self.fontWeight = fontWeight
     self.textColor = textColor
     self.fadingPower = fadingPower
+    self.hapticsEnabled = hapticsEnabled
   }
 
   /// Total height of the wheel viewport.

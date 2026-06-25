@@ -182,6 +182,29 @@ final class CalendarScreenViewModel {
     }
   }
 
+  /// Composes the VoiceOver label for [date]: full localized date + selection / today / holiday
+  /// state. Shared by every day-cell surface (month grid + week strip) so their wording stays in sync.
+  func accessibilityLabel(for date: CalDate) -> String {
+    let state = dayState(for: date)
+    var parts = [CalendarFormatting.longDate(date, locale: locale, calendar: calendar)]
+    if state.isToday { parts.append(L10n.string(L10n.Key.a11yToday, locale: locale)) }
+
+    let range = selectedRange
+    if state.isDisabled {
+      parts.append(L10n.string(L10n.Key.a11yUnavailable, locale: locale))
+    } else if state.isSameDay {
+      parts.append(L10n.string(L10n.Key.a11ySelectedSingle, locale: locale))
+    } else if date == range.start {
+      parts.append(L10n.string(L10n.Key.a11ySelectedStart, locale: locale))
+    } else if date == range.end {
+      parts.append(L10n.string(L10n.Key.a11ySelectedEnd, locale: locale))
+    } else if state.isInBetween {
+      parts.append(L10n.string(L10n.Key.a11yInRange, locale: locale))
+    }
+    if let name = state.holidayName { parts.append(name) }
+    return parts.joined(separator: ", ")
+  }
+
   // MARK: - Per-day render state (port of RangeDayCell)
 
   func dayState(for date: CalDate) -> DayCellState {

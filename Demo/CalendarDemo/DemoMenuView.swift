@@ -217,7 +217,7 @@ struct DemoMenuView: View {
     }
     .fullScreenCover(isPresented: $showYear) {
       NavigationStack {
-        CalendarYearView(year: 2026, locale: Locale(identifier: localeTag)) { _ in }
+        CalendarYearView(year: 2026, calendar: demoCalendar, locale: Locale(identifier: localeTag)) { _ in }
           .navigationTitle("2026")
           .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Kapat") { showYear = false } } }
       }

@@ -30,7 +30,7 @@ struct BrowseDemoView: View {
       .calendarSelectedDateAccessory { date in
         HStack(spacing: 10) {
           Image(systemName: "calendar.badge.checkmark")
-          Text(longDate(date))
+          Text(DemoData.longDate(date, calendar: configuration.calendar, localeTag: localeTag))
             .font(.system(size: 15, weight: .semibold))
           Spacer()
         }
@@ -41,15 +41,6 @@ struct BrowseDemoView: View {
     }
     .navigationTitle("Browse + Tema + Accessory")
     .navigationBarTitleDisplayMode(.inline)
-  }
-
-  private func longDate(_ date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.calendar = configuration.calendar
-    formatter.locale = Locale(identifier: localeTag)
-    formatter.dateStyle = .full
-    formatter.timeStyle = .none
-    return formatter.string(from: date)
   }
 }
 

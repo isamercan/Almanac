@@ -25,6 +25,10 @@ public struct CalendarWeekView: View {
 
   /// Sunday-of-week / first-weekday-of-week start dates, one per page.
   private let weekStarts: [CalDate]
+  /// The grid's navigable day window [startMonth firstDay … endMonth lastDay]. Days outside it (the
+  /// trailing/leading days of edge weeks) are dimmed and non-selectable, matching the month grid.
+  private let windowLower: CalDate
+  private let windowUpper: CalDate
 
   public init(
     configuration: CalendarPickerConfiguration,
@@ -45,6 +49,8 @@ public struct CalendarWeekView: View {
     self.showsTitle = showsTitle
     self.showsWeekdayHeader = showsWeekdayHeader
     self.weekStarts = starts
+    self.windowLower = lower
+    self.windowUpper = upper
 
     // Open on the week containing the selection anchor (going date, else today), clamped.
     let anchor = vm.selectedRange.start ?? vm.today.date
@@ -55,7 +61,7 @@ public struct CalendarWeekView: View {
   public var body: some View {
     VStack(spacing: 0) {
       if showsTitle { title }
-      if showsWeekdayHeader { weekdayHeader }
+      if showsWeekdayHeader && viewModel.showsWeekdayHeader { weekdayHeader }
 
       TabView(selection: $currentWeek) {
         ForEach(weekStarts.indices, id: \.self) { idx in
@@ -72,8 +78,11 @@ public struct CalendarWeekView: View {
     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     .onAppear {
       controller?.scrollHandler = { date, animated in
-        let target = CalDate(date, in: viewModel.calendar)
-        guard let idx = WeekMath.index(ofWeekContaining: target, in: weekStarts, calendar: viewModel.calendar)
+        // Clamp into the navigable window before paging — mirrors CalendarGridView's scroll, which
+        // clamps the target month into range rather than silently no-op'ing.
+        let raw = CalDate(date, in: viewModel.calendar)
+        let clamped = min(max(raw, windowLower), windowUpper)
+        guard let idx = WeekMath.index(ofWeekContaining: clamped, in: weekStarts, calendar: viewModel.calendar)
         else { return }
         if animated { withAnimation { currentWeek = idx } } else { currentWeek = idx }
       }
@@ -131,59 +140,45 @@ public struct CalendarWeekView: View {
 
   @ViewBuilder
   private func dayCell(_ date: CalDate) -> some View {
-    let state = viewModel.dayState(for: date)
-    Group {
-      if let custom = content.day {
-        custom(viewModel.dayContext(for: date))
-      } else {
-        CalendarDayIndicator(
-          day: date.day,
-          isSelected: state.isSelected,
-          isToday: state.isToday,
-          isHoliday: state.holidayColor != nil,
-          isInBetween: state.isInBetween,
-          isSameDay: state.isSameDay,
-          isDisabled: state.isDisabled,
-          holidayIndicatorColor: state.holidayColor ?? .clear,
-          badge: state.badge,
-          style: style)
+    if date < windowLower || date > windowUpper {
+      // Trailing/leading days of an edge week that fall outside the grid's navigable window: shown
+      // dimmed and inert so the week strip never offers a day the month grid wouldn't.
+      CalendarDayIndicator(
+        day: date.day, isSelected: false, isToday: false, isHoliday: false, isDisabled: true, style: style)
+        .accessibilityHidden(true)
+    } else {
+      let state = viewModel.dayState(for: date)
+      Group {
+        if let custom = content.day {
+          custom(viewModel.dayContext(for: date))
+        } else {
+          CalendarDayIndicator(
+            day: date.day,
+            isSelected: state.isSelected,
+            isToday: state.isToday,
+            isHoliday: state.holidayColor != nil,
+            isInBetween: state.isInBetween,
+            isSameDay: state.isSameDay,
+            isDisabled: state.isDisabled,
+            holidayIndicatorColor: state.holidayColor ?? .clear,
+            badge: state.badge,
+            style: style)
+        }
       }
+      .contentShape(Rectangle())
+      .onTapGesture {
+        if viewModel.hapticsEnabled { Haptics.dayTap() }
+        viewModel.onDayTapped(date)
+      }
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(viewModel.accessibilityLabel(for: date))
+      .accessibilityAddTraits(state.isSelected ? [.isButton, .isSelected] : .isButton)
     }
-    .contentShape(Rectangle())
-    .onTapGesture {
-      if viewModel.hapticsEnabled { Haptics.dayTap() }
-      viewModel.onDayTapped(date)
-    }
-    .accessibilityElement(children: .ignore)
-    .accessibilityLabel(accessibilityLabel(date, state))
-    .accessibilityAddTraits(state.isSelected ? [.isButton, .isSelected] : .isButton)
   }
 
   private var rowHeight: CGFloat {
     let base = style.metrics.dayCellMaxSize + 16
     return viewModel.priceByDate.isEmpty ? base : base + 22
-  }
-
-  /// VoiceOver label: full date + selection/today/holiday state (mirrors the month grid).
-  private func accessibilityLabel(_ date: CalDate, _ state: DayCellState) -> String {
-    let locale = viewModel.locale
-    var parts = [CalendarFormatting.longDate(date, locale: locale, calendar: viewModel.calendar)]
-    if state.isToday { parts.append(L10n.string(L10n.Key.a11yToday, locale: locale)) }
-
-    let range = viewModel.selectedRange
-    if state.isDisabled {
-      parts.append(L10n.string(L10n.Key.a11yUnavailable, locale: locale))
-    } else if state.isSameDay {
-      parts.append(L10n.string(L10n.Key.a11ySelectedSingle, locale: locale))
-    } else if date == range.start {
-      parts.append(L10n.string(L10n.Key.a11ySelectedStart, locale: locale))
-    } else if date == range.end {
-      parts.append(L10n.string(L10n.Key.a11ySelectedEnd, locale: locale))
-    } else if state.isInBetween {
-      parts.append(L10n.string(L10n.Key.a11yInRange, locale: locale))
-    }
-    if let name = state.holidayName { parts.append(name) }
-    return parts.joined(separator: ", ")
   }
 }
 

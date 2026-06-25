@@ -28,6 +28,19 @@ All notable changes to Almanac are documented here. Format follows
 - `CalendarYearView` mini-months no longer hardcode the Gregorian calendar: blank-cell offsets, day
   counts, month names and year titles now honour the injected `Calendar` + `firstWeekday`, so
   non-Gregorian calendars (e.g. Hijri) lay out correctly.
+- `CalendarBrowseView` and `CalendarWeekView` now derive their window from the grid's exact month
+  bounds (`CalendarPickerConfiguration.resolvedMonthBounds()`): the year overview dims/disables
+  months the grid can't reach (no more tapping a month and landing on a different one), and the week
+  strip dims out-of-range edge-week days instead of letting them be selected.
+- `CalendarWeekView` now honours `chrome.showsWeekdayHeader` and clamps `controller.scroll(to:)` into
+  range (matching the grid) instead of silently no-op'ing for out-of-range dates.
+- `CalendarBrowseView` renders `.calendarSelectedDateAccessory`, accepts an external
+  `CalendarController`, and shows its year label so a single-year span is never unlabeled.
+- `CalendarYearView` text now flows through `CalendarStyle` typography tokens (`yearTitle`,
+  `miniMonthTitle`, `miniMonthDay`), so it restyles with `.calendarStyle(_:)` and scales with Dynamic
+  Type like every other surface.
+- `TimePickerConfig.hapticsEnabled` is now a constructor parameter (was settable only post-init).
+- The month grid and week strip share one VoiceOver-label builder, keeping their wording in sync.
 
 ## [0.1.0] - 2026-06-23
 
