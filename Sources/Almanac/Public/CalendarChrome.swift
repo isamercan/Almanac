@@ -17,6 +17,9 @@ public struct CalendarChrome: Equatable, Sendable {
   public var showsClearButton: Bool
   /// The "Apply" button (within the footer).
   public var showsApplyButton: Bool
+  /// A floating "jump to today" button over the grid. **Opt-in** — off by default (including in
+  /// `.full`) so the stock look is unchanged; set it true to surface the affordance.
+  public var showsTodayButton: Bool
 
   public init(
     showsTitleBar: Bool = true,
@@ -25,7 +28,8 @@ public struct CalendarChrome: Equatable, Sendable {
     showsLegend: Bool = true,
     showsFooter: Bool = true,
     showsClearButton: Bool = true,
-    showsApplyButton: Bool = true)
+    showsApplyButton: Bool = true,
+    showsTodayButton: Bool = false)
   {
     self.showsTitleBar = showsTitleBar
     self.showsDateRow = showsDateRow
@@ -34,15 +38,16 @@ public struct CalendarChrome: Equatable, Sendable {
     self.showsFooter = showsFooter
     self.showsClearButton = showsClearButton
     self.showsApplyButton = showsApplyButton
+    self.showsTodayButton = showsTodayButton
   }
 
-  /// The stock picker — every part visible.
+  /// The stock picker — every part visible (Today button still opt-in).
   public static let full = CalendarChrome()
 
   /// No top bar and no footer (the bare grid look); the weekday header is kept.
   public static let none = CalendarChrome(
     showsTitleBar: false, showsDateRow: false, showsWeekdayHeader: true, showsLegend: false,
-    showsFooter: false, showsClearButton: false, showsApplyButton: false)
+    showsFooter: false, showsClearButton: false, showsApplyButton: false, showsTodayButton: false)
 
   /// `showsTopBar` convenience: true when either the title bar or the date row is shown.
   public var showsTopBar: Bool { showsTitleBar || showsDateRow }

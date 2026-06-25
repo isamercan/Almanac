@@ -11,6 +11,9 @@
 "etscalendar_rentacar_drop_off_date_title" = "تاريخ التسليم";
 "etscalendar_hotel_checkin_date_title" = "تاريخ الوصول";
 "etscalendar_hotel_checkout_date_title" = "تاريخ المغادرة";
+"etscalendar_today" = "اليوم";
+"etscalendar_year_overview" = "السنة";
+"etscalendar_months" = "الأشهر";
 
 "etscalendar_a11y_today" = "اليوم";
 "etscalendar_a11y_selected_start" = "تاريخ البدء المحدد";

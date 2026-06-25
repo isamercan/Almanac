@@ -14,6 +14,16 @@ enum DemoData {
     calendar.date(byAdding: .day, value: days, to: calendar.startOfDay(for: Date())) ?? Date()
   }
 
+  /// Shared full-style date formatting for the demo screens (avoids per-screen DateFormatter setup).
+  static func longDate(_ date: Date, calendar: Calendar, localeTag: String) -> String {
+    let formatter = DateFormatter()
+    formatter.calendar = calendar
+    formatter.locale = Locale(identifier: localeTag)
+    formatter.dateStyle = .full
+    formatter.timeStyle = .none
+    return formatter.string(from: date)
+  }
+
   private static func etsDate(daysFromNow days: Int) -> ETSCalendarDate {
     let d = date(daysFromNow: days)
     let c = calendar.dateComponents([.year, .month, .day], from: d)

@@ -3,7 +3,8 @@
 # Almanac
 
 **A fully-configurable SwiftUI date-range calendar for iOS** — range & single selection, holidays,
-price badges, dark mode, RTL, any `Calendar` (Gregorian, Hijri…), and a live design configurator.
+price badges, dark mode, RTL, any `Calendar` (Gregorian, Hijri…), week / month / year layouts with
+year ↔ month browsing, theme presets, and a live design configurator.
 
 [![Swift Package Index](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fisamercan%2FAlmanac%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/isamercan/Almanac)
 [![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fisamercan%2FAlmanac%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/isamercan/Almanac)
@@ -75,7 +76,8 @@ Everything beyond plain range selection is additive and opt-in — the stock def
 
 - **Dark mode + full design config** — adaptive colors plus one comprehensive `CalendarStyle`
   (`theme` colors + `typography` + `metrics`: sizes, spacings, radii, animation, line widths),
-  injected with `.calendarStyle(_:)`; `.calendarTheme(_:)` is a colors-only shortcut.
+  injected with `.calendarStyle(_:)`; `.calendarTheme(_:)` is a colors-only shortcut. Ships named
+  palettes too — `CalendarThemePreset` (`.ocean`, `.sunset`, `.forest`, `.midnight`) on top of `.standard`.
 - **Accessibility** — VoiceOver labels on day cells (date + state) and adjustable time wheels;
   Dynamic Type scaling; Reduce Motion support.
 - **State restoration** — opt-in `@SceneStorage` persistence via `restorationID`.
@@ -85,13 +87,17 @@ Everything beyond plain range selection is additive and opt-in — the stock def
   `CalendarPickerHosting.present(…)`, and an `AsyncStream` of live selection changes.
 - **RTL + locales** — tr (default), en, ar (right-to-left).
 - **Composability** — bring-your-own views via `.calendarDay`, `.calendarMonthHeader`,
-  `.calendarWeekdayHeader`, `.calendarLegend` (fed a public `CalendarDayContext`).
-- **Layout & navigation** — vertical or **horizontal paging**, configurable first weekday,
-  hideable weekday header / legend, programmatic `CalendarController.scroll(to:)`, and a 12-month
-  `CalendarYearView` overview.
+  `.calendarWeekdayHeader`, `.calendarLegend`, `.calendarSelectedDateAccessory` (fed a public
+  `CalendarDayContext` / the selected day).
+- **Layout & navigation** — vertical or **horizontal paging**, configurable first weekday (via the
+  injected `Calendar`), hideable weekday header / legend, programmatic `CalendarController.scroll(to:)`,
+  an opt-in **"jump to today"** button, a paged **`CalendarWeekView`** week strip, a single- or
+  multi-year `CalendarYearView` overview, and `CalendarBrowseView` for full **year ↔ month**
+  navigation (tap a month to zoom into the grid). The week/month/year views share one selection
+  engine, so holidays, prices, blocked days and min/max nights behave identically across them.
 - **Configurable chrome** — `CalendarChrome` toggles each surrounding part independently (title bar,
-  date row, weekday header, legend, footer, Clear / Apply buttons). `.full` = stock picker,
-  `.none` = bare grid, or any mix. Plus `CalendarGridView` for a pure grid drop-in.
+  date row, weekday header, legend, footer, Clear / Apply buttons, Today button). `.full` = stock
+  picker, `.none` = bare grid, or any mix. Plus `CalendarGridView` for a pure grid drop-in.
 - **Design configurator** — `CalendarStyleConfigurator`: live preview + controls (day shape, colors,
   typography, metrics) that generate copyable Swift for a `CalendarStyle`.
 - **Tests & tooling** — unit tests, image snapshot tests, XCUITests, GitHub Actions CI, SwiftLint
@@ -118,7 +124,7 @@ public API — open *Calendar Library Örnekleri → Tüm Örnekler* in the demo
 | 2 | Vertical Airbnb-style range, past disabled | `CalendarRangePickerView` |
 | 3 | Horizontal single-select flight calendar | `.single` + `priceByDate` |
 | 4 | Custom design + custom month header | `CalendarStyle` + `.calendarMonthHeader` |
-| 5 / 7 | Week calendar (paged / continuous) | themed SwiftUI strip |
+| 5 / 7 | Week calendar (paged / continuous) | themed SwiftUI strip (or the built-in `CalendarWeekView`) |
 | 6 | GitHub-style heat map | `CalendarGridView` + `.calendarDay` |
 | 8 | Fullscreen horizontal picker | `horizontalPaging` + chrome |
 | 9 | Animated month ↔ week toggle | grid ↔ strip transitions |
@@ -179,8 +185,9 @@ style.theme.ink = .indigo
 style.metrics.footerCornerRadius = 12
 style.typography.dayNumber.size = 18
 someView.calendarStyle(style)
-// …or colors only:
-someView.calendarTheme(.standard)
+// …or colors only — a custom theme or a bundled preset:
+someView.calendarTheme(.ocean)        // .standard / .ocean / .sunset / .forest / .midnight
+// (CalendarThemePreset.allCases gives [.standard, .ocean, …] with .displayName for a picker)
 
 // Interactive design playground (live preview + controls + copyable generated Swift)
 @State private var style = CalendarStyle.standard
@@ -195,15 +202,38 @@ CalendarRangePickerView.rangeSelector(configuration: config, onApply: { _ in })
       .background(ctx.isSelected ? Color.purple : .clear, in: RoundedRectangle(cornerRadius: 8))
   }
 
-// Horizontal paging + programmatic scroll
+// Horizontal paging + programmatic scroll (first weekday comes from the injected Calendar)
+var sundayFirst = Calendar(identifier: .gregorian); sundayFirst.firstWeekday = 1
 let controller = CalendarController()
 CalendarRangePickerView(
-  configuration: CalendarPickerConfiguration(horizontalPaging: true, firstWeekday: 1),
+  configuration: CalendarPickerConfiguration(horizontalPaging: true, calendar: sundayFirst),
   controller: controller, onApply: { _ in })
-// later: controller.scroll(to: someDate)
+// later: controller.scroll(to: someDate)   // or controller.scrollToToday()
 
-// 12-month overview
+// Year overview — one year, or a scrollable span; honours the injected calendar (e.g. Hijri)
 CalendarYearView(year: 2026, locale: Locale(identifier: "tr")) { month in /* jump to month */ }
+CalendarYearView(years: 2026...2028, calendar: myCalendar, locale: .current) { month in /* … */ }
+
+// Week — paged week strip with the full selection engine (range or single)
+CalendarWeekView(configuration: CalendarPickerConfiguration(localeTag: "tr", selectionMode: .single)) { result in
+  // result.goingDate — the selected day
+}
+
+// Browse — year ↔ month navigation in one component (tap a month to zoom into the grid)
+CalendarBrowseView(configuration: CalendarPickerConfiguration(localeTag: "tr")) { result in
+  // result.goingDate — live selection as the user browses
+}
+
+// Opt-in "jump to today" button over the grid
+var config = CalendarPickerConfiguration(localeTag: "tr")
+config.chrome.showsTodayButton = true
+CalendarRangePickerView.rangeSelector(configuration: config, onApply: { _ in })
+
+// Detail card for the selected day (calendar-app style), shown above the footer
+CalendarRangePickerView.rangeSelector(configuration: config, onApply: { _ in })
+  .calendarSelectedDateAccessory { date in
+    Text(date, style: .date).padding().frame(maxWidth: .infinity).background(.thinMaterial)
+  }
 
 // Bare calendar — no top bar / footer, embed in your own screen
 CalendarGridView(configuration: CalendarPickerConfiguration(localeTag: "tr")) { result in
@@ -211,12 +241,13 @@ CalendarGridView(configuration: CalendarPickerConfiguration(localeTag: "tr")) { 
 }
 
 // Or toggle any chrome part on the full picker (e.g. grid + Apply button only)
-var config = CalendarPickerConfiguration(localeTag: "tr")
-config.chrome = CalendarChrome(showsTitleBar: false, showsLegend: false, showsClearButton: false)
-CalendarRangePickerView.rangeSelector(configuration: config, onApply: { _ in })
+var bare = CalendarPickerConfiguration(localeTag: "tr")
+bare.chrome = CalendarChrome(showsTitleBar: false, showsLegend: false, showsClearButton: false)
+CalendarRangePickerView.rangeSelector(configuration: bare, onApply: { _ in })
 ```
 
-The standalone drum time pickers are `TimeWheel24` and `TimeWheelAmPm`.
+The standalone drum time pickers are `TimeWheel24` and `TimeWheelAmPm` (tick haptics on by default;
+disable via `TimePickerConfig.hapticsEnabled`).
 
 ## Documentation
 

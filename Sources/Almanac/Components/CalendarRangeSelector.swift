@@ -112,30 +112,7 @@ struct CalendarRangeSelector: View {
       }
     }
     .accessibilityElement(children: .ignore)
-    .accessibilityLabel(accessibilityLabel(date: date, state: state))
+    .accessibilityLabel(viewModel.accessibilityLabel(for: date))
     .accessibilityAddTraits(state.isSelected ? [.isButton, .isSelected] : .isButton)
-  }
-
-  /// Composes a VoiceOver label: full date + selection/today/holiday state.
-  @MainActor private func accessibilityLabel(date: CalDate, state: DayCellState) -> String {
-    let locale = viewModel.locale
-    var parts = [CalendarFormatting.longDate(date, locale: locale, calendar: viewModel.calendar)]
-    if state.isToday { parts.append(L10n.string(L10n.Key.a11yToday, locale: locale)) }
-
-    let range = viewModel.selectedRange
-    if state.isDisabled {
-      parts.append(L10n.string(L10n.Key.a11yUnavailable, locale: locale))
-    } else if state.isSameDay {
-      parts.append(L10n.string(L10n.Key.a11ySelectedSingle, locale: locale))
-    } else if date == range.start {
-      parts.append(L10n.string(L10n.Key.a11ySelectedStart, locale: locale))
-    } else if date == range.end {
-      parts.append(L10n.string(L10n.Key.a11ySelectedEnd, locale: locale))
-    } else if state.isInBetween {
-      parts.append(L10n.string(L10n.Key.a11yInRange, locale: locale))
-    }
-
-    if let name = state.holidayName { parts.append(name) }
-    return parts.joined(separator: ", ")
   }
 }

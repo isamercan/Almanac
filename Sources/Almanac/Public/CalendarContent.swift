@@ -32,6 +32,8 @@ struct CalendarContent {
   var weekdayHeader: ((Int, Locale) -> AnyView)?       // weekdayIndex (0 = Sunday … 6 = Saturday)
   var monthHeader: ((CalMonth, Locale) -> AnyView)?
   var legend: (([HolidayCategory]) -> AnyView)?
+  /// Accessory shown above the footer when a date is selected (the range end, else the start).
+  var selectedDateAccessory: ((Date) -> AnyView)?
 }
 
 private struct CalendarContentKey: EnvironmentKey {
@@ -72,6 +74,15 @@ public extension View {
   func calendarLegend(@ViewBuilder _ content: @escaping ([HolidayCategory]) -> some View) -> some View {
     transformEnvironment(\.calendarContent) { value in
       value.legend = { categories in AnyView(content(categories)) }
+    }
+  }
+
+  /// Provides an accessory view rendered above the footer whenever a date is selected — fed the most
+  /// relevant day (the range end if set, otherwise the start), as a start-of-day `Date`. Use it for
+  /// calendar-app-style detail (events, notes, a fare summary…). Hidden when nothing is selected.
+  func calendarSelectedDateAccessory(@ViewBuilder _ content: @escaping (Date) -> some View) -> some View {
+    transformEnvironment(\.calendarContent) { value in
+      value.selectedDateAccessory = { date in AnyView(content(date)) }
     }
   }
 }

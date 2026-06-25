@@ -37,6 +37,15 @@ enum CalendarFormatting {
     return "\(name) \(month.year)"
   }
 
+  /// "2026" / "١٤٤٧" — the era-aware, localized year number for [year] in [calendar]. Renders the
+  /// correct numerals per locale and the right era year for non-Gregorian calendars (e.g. Hijri).
+  static func yearTitle(_ year: Int, locale: Locale, calendar: Calendar = CalendarMath.gregorian) -> String {
+    let formatter = formatter(locale: locale, calendar: calendar, key: "year") {
+      $0.setLocalizedDateFormatFromTemplate("y")
+    }
+    return formatter.string(from: CalMonth(year: year, month: 1).firstDayDate(in: calendar))
+  }
+
   /// "Mayıs" / "May" — standalone full month name (no year), first char uppercased.
   static func monthName(_ month: Int, locale: Locale, calendar: Calendar = CalendarMath.gregorian) -> String {
     let symbols = formatter(locale: locale, calendar: calendar, key: "symbols") { _ in }.standaloneMonthSymbols ?? []

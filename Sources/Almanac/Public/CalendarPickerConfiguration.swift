@@ -102,15 +102,27 @@ public struct CalendarPickerConfiguration {
   /// Resolved locale (BCP-47 tag or system default).
   public var locale: Locale { localeTag.map { Locale(identifier: $0) } ?? .current }
 
+  /// The visible/selectable month window every surface shares: from today's month through
+  /// `maxSelectableDate`'s month (or one year ahead when unset). The grid, week and browse views all
+  /// derive their bounds from this, so they agree on which months are navigable.
+  func resolvedMonthBounds() -> ClosedRange<CalMonth> {
+    let today = CalendarMath.today(in: calendar)
+    let startMonth = today.calMonth
+    let endMonth: CalMonth = maxSelectableDate
+      .map { CalDate($0, in: calendar).calMonth.coercedAtLeast(startMonth) }
+      ?? startMonth.adding(years: 1, in: calendar)
+    return startMonth...endMonth
+  }
+
   /// Builds the screen's view model from this configuration.
   @MainActor
   func makeViewModel() -> CalendarScreenViewModel {
     let today = CalendarMath.today(in: calendar)
 
     let maxSelectable: CalDate? = maxSelectableDate.map { CalDate($0, in: calendar) }
-    let startMonth = today.calMonth
-    let endMonth: CalMonth = maxSelectable
-      .map { $0.calMonth.coercedAtLeast(startMonth) } ?? startMonth.adding(years: 1, in: calendar)
+    let monthBounds = resolvedMonthBounds()
+    let startMonth = monthBounds.lowerBound
+    let endMonth = monthBounds.upperBound
 
     // Clamp supplied dates into the selectable window [today, maxSelectable] so an out-of-range
     // initial value can't produce a selection outside the calendar.

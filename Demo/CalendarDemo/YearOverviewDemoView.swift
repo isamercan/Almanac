@@ -11,7 +11,10 @@ struct YearOverviewDemoView: View {
   @State private var showPicker = false
 
   var body: some View {
-    CalendarYearView(year: 2026, locale: Locale(identifier: "tr")) { month in
+    CalendarYearView(
+      year: 2026,
+      calendar: configuration.calendar,
+      locale: Locale(identifier: configuration.localeTag ?? "tr")) { month in
       pendingMonth = month
       showPicker = true
     }

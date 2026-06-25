@@ -38,6 +38,22 @@ final class ConfigurationTests: XCTestCase {
     XCTAssertTrue(vm.firstVisibleMonth.yearMonth <= vm.endMonth.yearMonth)
   }
 
+  func testResolvedMonthBoundsMatchViewModel() {
+    // The browse / week views derive their navigable window from resolvedMonthBounds(); it must
+    // agree exactly with the grid's view-model bounds so they never disagree on which months exist.
+    let config = CalendarPickerConfiguration(maxSelectableDate: date(400))
+    let bounds = config.resolvedMonthBounds()
+    let vm = config.makeViewModel()
+    XCTAssertEqual(bounds.lowerBound, vm.startMonth.yearMonth)
+    XCTAssertEqual(bounds.upperBound, vm.endMonth.yearMonth)
+  }
+
+  func testResolvedMonthBoundsDefaultsToOneYear() {
+    let bounds = CalendarPickerConfiguration().resolvedMonthBounds()
+    XCTAssertEqual(bounds.lowerBound, CalendarMath.today().calMonth)
+    XCTAssertEqual(bounds.upperBound, bounds.lowerBound.adding(years: 1))
+  }
+
   func testChromePresets() {
     XCTAssertTrue(CalendarChrome.full.showsTopBar)
     XCTAssertTrue(CalendarChrome.full.showsFooter)

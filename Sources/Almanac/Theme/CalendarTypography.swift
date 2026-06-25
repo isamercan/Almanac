@@ -31,6 +31,11 @@ public struct CalendarTypography: Equatable, Sendable {
   public var dateLabel = CalendarTextStyle(size: 16, weight: .semibold, relativeTo: .body)
   public var button = CalendarTextStyle(size: 16, weight: .semibold, relativeTo: .body)
   public var legend = CalendarTextStyle(size: 14, weight: .medium, relativeTo: .footnote)
+  /// Year-overview heading (`CalendarYearView` multi-year sections).
+  public var yearTitle = CalendarTextStyle(size: 22, weight: .bold, relativeTo: .title2)
+  /// Mini-month title + day numbers in the year overview.
+  public var miniMonthTitle = CalendarTextStyle(size: 13, weight: .semibold, relativeTo: .caption)
+  public var miniMonthDay = CalendarTextStyle(size: 9, weight: .regular, relativeTo: .caption2)
 
   public init() {}
 }
