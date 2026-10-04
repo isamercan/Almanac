@@ -1,10 +1,11 @@
 import SwiftUI
 import Foundation
 
-/// One scrollable drum column. Uses an iOS 17 snapping
-/// `ScrollView` (`.viewAligned` + symmetric content margins) so the snapped item sits centered, and
-/// provides a cylinder transform, continuous tick haptics, settle callback, and
-/// soft-bound re-alignment.
+/// One scrollable drum column. On iOS 17 and later it is a snapping `ScrollView` (`.viewAligned` +
+/// symmetric content margins) so the snapped item sits centered, with a cylinder transform,
+/// continuous tick haptics, settle callback, and soft-bound re-alignment. Before iOS 17 — which has
+/// no scroll-position binding — it is the system wheel `Picker`, with the same items, value and
+/// accessibility.
 struct WheelColumn: View {
   let items: [String]
   /// Externally-driven selected index (may be coerced by the parent's soft bounds).
@@ -23,9 +24,38 @@ struct WheelColumn: View {
   private let spaceName = "wheelColumn"
 
   var body: some View {
-    let viewportCenter = config.wheelHeight / 2
+    if #available(iOS 17, *) {
+      drum
+    } else {
+      systemWheel
+    }
+  }
 
-    ScrollView(.vertical, showsIndicators: false) {
+  /// Before iOS 17: the system wheel, same items and value.
+  private var systemWheel: some View {
+    Picker(accessibilityLabel, selection: Binding(
+      get: { selectedIndex },
+      set: { index in
+        if config.hapticsEnabled { Haptics.wheelTick() }
+        if index != selectedIndex { onSelectedChanged(index) }
+      })) {
+      ForEach(items.indices, id: \.self) { index in
+        Text(items[index])
+          .font(config.font)
+          .foregroundStyle(config.textColor.opacity(isIndexDisabled(index) ? 0.2 : 1))
+          .tag(index)
+      }
+    }
+    .pickerStyle(.wheel)
+    .labelsHidden()
+    .frame(height: config.wheelHeight)
+    .clipped()
+  }
+
+  @available(iOS 17, *)
+  private var drum: some View {
+    let viewportCenter = config.wheelHeight / 2
+    return ScrollView(.vertical, showsIndicators: false) {
       LazyVStack(spacing: 0) {
         ForEach(items.indices, id: \.self) { index in
           row(index: index, viewportCenter: viewportCenter)
@@ -41,7 +71,7 @@ struct WheelColumn: View {
     .contentMargins(.vertical, CGFloat(config.halfVisible) * config.itemHeight, for: .scrollContent)
     .frame(height: config.wheelHeight)
     .onAppear { if scrollID == nil { scrollID = selectedIndex } }
-    .onChange(of: selectedIndex) { _, newValue in
+    .onChange(of: selectedIndex) { newValue in
       // The parent accepted/coerced the value — re-align the wheel to it with a snappy spring, and
       // cancel any pending settle re-assertion (this change already supersedes it).
       settleTask?.cancel()
@@ -49,7 +79,7 @@ struct WheelColumn: View {
         withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) { scrollID = newValue }
       }
     }
-    .onChange(of: scrollID) { _, newValue in
+    .onChange(of: scrollID) { newValue in
       guard let idx = newValue else { return }
       if config.hapticsEnabled { Haptics.wheelTick() }   // tick on every center crossing, including while scrolling
       scheduleSettle(idx)

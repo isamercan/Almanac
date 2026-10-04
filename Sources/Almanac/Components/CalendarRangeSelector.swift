@@ -11,8 +11,8 @@ import HorizonCalendar
 /// HorizonCalendar's `dayRanges` (a continuous bar) is intentionally unused; the in-between look is
 /// per-cell.
 struct CalendarRangeSelector: View {
-  let viewModel: CalendarScreenViewModel
-  let proxy: CalendarViewProxy
+  @ObservedObject var viewModel: CalendarScreenViewModel
+  let proxy: CalendarScrollProxy
   /// Bottom content inset so the last rows clear the floating footer.
   var bottomInset: CGFloat = 0
   /// Passed explicitly into the HorizonCalendar-hosted cells (they don't inherit the environment).
@@ -29,54 +29,55 @@ struct CalendarRangeSelector: View {
       ? .horizontal(options: HorizontalMonthsLayoutOptions())
       : .vertical(options: VerticalMonthsLayoutOptions(pinDaysOfWeekToTop: true))
 
-    return CalendarViewRepresentable(
+    // Rebuilt on every selection change (the view model publishes it), so the day providers read
+    // the current state.
+    let gridContent = CalendarViewContent(
       calendar: calendar,
       visibleDateRange: lower...upper,
-      monthsLayout: monthsLayout,
-      // Re-renders the day providers whenever the selection changes (the recommended pattern in
-      // place of reading mutable state inside the provider closures).
-      dataDependency: viewModel.selectedRange,
-      proxy: proxy)
-    .days { day in
-      dayView(for: day)
-    }
-    .dayOfWeekHeaders { _, weekdayIndex in
-      weekdayHeaderView(weekdayIndex)
-    }
-    .monthHeaders { month in
-      let calMonth = CalMonth(year: month.year, month: month.month)
-      if let custom = content.monthHeader {
-        custom(calMonth, viewModel.locale)
-      } else {
-        Text(CalendarFormatting.monthTitle(calMonth, locale: viewModel.locale, calendar: calendar))
-          .calendarTextStyle(style.typography.monthTitle)
-          .foregroundStyle(style.theme.ink)
-          .frame(maxWidth: .infinity, alignment: .center)
-          .padding(.top, metrics.monthHeaderTopPadding)
-          .padding(.bottom, metrics.monthHeaderBottomPadding)
+      monthsLayout: monthsLayout)
+      .dayItemProvider { day in
+        dayView(year: day.month.year, month: day.month.month, day: day.day).calendarItemModel
       }
-    }
-    .dayAspectRatio(viewModel.priceByDate.isEmpty ? metrics.dayAspectRatio : metrics.dayAspectRatioWithBadges)
-    .interMonthSpacing(metrics.interMonthSpacing)
-    .verticalDayMargin(metrics.weekRowSpacing)
-    .horizontalDayMargin(0)
-    .backgroundColor(UIColor(style.theme.surface))
-    .layoutMargins(
-      .init(top: 0, leading: metrics.horizontalPadding, bottom: bottomInset, trailing: metrics.horizontalPadding))
-    .onDaySelection { day in
-      if viewModel.hapticsEnabled { Haptics.dayTap() }
-      viewModel.onDayTapped(CalDate(year: day.month.year, month: day.month.month, day: day.day))
-    }
-    .onScroll { visibleDayRange, _ in
-      let lowerMonth = visibleDayRange.lowerBound.month
-      let upperMonth = visibleDayRange.upperBound.month
-      viewModel.updateVisibleMonths(
-        first: CalMonth(year: lowerMonth.year, month: lowerMonth.month),
-        last: CalMonth(year: upperMonth.year, month: upperMonth.month))
-    }
+      .dayOfWeekItemProvider { _, weekdayIndex in
+        weekdayHeaderView(weekdayIndex).calendarItemModel
+      }
+      .monthHeaderItemProvider { month in
+        monthHeaderView(CalMonth(year: month.year, month: month.month)).calendarItemModel
+      }
+      .dayAspectRatio(viewModel.priceByDate.isEmpty ? metrics.dayAspectRatio : metrics.dayAspectRatioWithBadges)
+      .interMonthSpacing(metrics.interMonthSpacing)
+      .verticalDayMargin(metrics.weekRowSpacing)
+      .horizontalDayMargin(0)
+
+    return CalendarHost(
+      content: gridContent,
+      backgroundColor: UIColor(style.theme.surface),
+      layoutMargins: .init(top: 0, leading: metrics.horizontalPadding, bottom: bottomInset, trailing: metrics.horizontalPadding),
+      proxy: proxy,
+      onDaySelection: { year, month, day in
+        if viewModel.hapticsEnabled { Haptics.dayTap() }
+        viewModel.onDayTapped(CalDate(year: year, month: month, day: day))
+      },
+      onScroll: { first, last in
+        viewModel.updateVisibleMonths(first: first, last: last)
+      })
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     // The day grid is a fixed 7-column layout; cap Dynamic Type so day numbers don't clip.
     .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+  }
+
+  @MainActor @ViewBuilder
+  private func monthHeaderView(_ calMonth: CalMonth) -> some View {
+    if let custom = content.monthHeader {
+      custom(calMonth, viewModel.locale)
+    } else {
+      Text(CalendarFormatting.monthTitle(calMonth, locale: viewModel.locale, calendar: viewModel.calendar))
+        .calendarTextStyle(style.typography.monthTitle)
+        .foregroundStyle(style.theme.ink)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.top, style.metrics.monthHeaderTopPadding)
+        .padding(.bottom, style.metrics.monthHeaderBottomPadding)
+    }
   }
 
   @MainActor @ViewBuilder
@@ -91,15 +92,15 @@ struct CalendarRangeSelector: View {
   }
 
   @MainActor @ViewBuilder
-  private func dayView(for day: DayComponents) -> some View {
-    let date = CalDate(year: day.month.year, month: day.month.month, day: day.day)
+  private func dayView(year: Int, month: Int, day: Int) -> some View {
+    let date = CalDate(year: year, month: month, day: day)
     let state = viewModel.dayState(for: date)
     Group {
       if let custom = content.day {
         custom(viewModel.dayContext(for: date))
       } else {
         CalendarDayIndicator(
-          day: day.day,
+          day: day,
           isSelected: state.isSelected,
           isToday: state.isToday,
           isHoliday: state.holidayColor != nil,

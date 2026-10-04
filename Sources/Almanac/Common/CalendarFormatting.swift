@@ -60,11 +60,20 @@ enum CalendarFormatting {
     return symbols[weekdayIndex].capitalizedFirst(locale)
   }
 
-  /// Localized long date, e.g. "9 Mayıs 2026" / "May 9, 2026".
-  static func longDate(_ date: CalDate, locale: Locale, calendar: Calendar = CalendarMath.gregorian) -> String {
-    let formatter = formatter(locale: locale, calendar: calendar, key: "long") {
-      $0.dateStyle = .long
-      $0.timeStyle = .none
+  /// Localized long date, e.g. "9 Mayıs 2026" / "May 9, 2026" — or, with `format`, that fixed
+  /// pattern in `locale` (e.g. "d MMMM yyyy").
+  static func longDate(_ date: CalDate, locale: Locale, calendar: Calendar = CalendarMath.gregorian,
+                       format: String? = nil) -> String {
+    let formatter: DateFormatter
+    if let format {
+      formatter = self.formatter(locale: locale, calendar: calendar, key: "format:\(format)") {
+        $0.dateFormat = format
+      }
+    } else {
+      formatter = self.formatter(locale: locale, calendar: calendar, key: "long") {
+        $0.dateStyle = .long
+        $0.timeStyle = .none
+      }
     }
     return formatter.string(from: date.startOfDay(in: calendar))
   }

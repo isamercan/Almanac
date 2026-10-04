@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Per-day render state, computed by the view model for the day cell provider.
 struct DayCellState: Equatable {
@@ -16,8 +16,7 @@ struct DayCellState: Equatable {
 /// Owns the selection state and the day-tap state machine. The screen hoists this state; the
 /// per-day selection visuals live in `CalendarRangeSelector`.
 @MainActor
-@Observable
-final class CalendarScreenViewModel {
+final class CalendarScreenViewModel: ObservableObject {
 
   // MARK: Resolved inputs (parity with CalendarScreen parameters)
   let today: Today
@@ -47,19 +46,25 @@ final class CalendarScreenViewModel {
   let returnPlaceholder: String?
   let isDismissEndEnabled: Bool
   let showPlusIconForReturn: Bool
+  /// The first selectable day (today, or the configuration's later `minimumDate`).
+  let minimumDay: CalDate
+  let returnTapBeforeStart: CalendarReturnTapBeforeStart
+  let clearBehavior: CalendarClearBehavior
+  let dateFormat: String?
+  let strings: CalendarStrings
   /// `.single` hides the return half of the top bar.
   var showsReturn: Bool { selectionMode == .range }
   var showsWeekdayHeader: Bool { chrome.showsWeekdayHeader }
   var showsLegend: Bool { chrome.showsLegend }
   /// Whether the configured locale lays out right-to-left (e.g. Arabic).
-  var isRTL: Bool { locale.language.characterDirection == .rightToLeft }
+  var isRTL: Bool { Locale.characterDirection(forLanguage: locale.languageCode ?? "") == .rightToLeft }
 
   // MARK: Mutable state
-  private(set) var selectedRange: SelectedRange
+  @Published private(set) var selectedRange: SelectedRange
   /// On the departure screen the very first tap always resets to a new departure and clears the
   /// return, regardless of prior state. in `CalendarRangeSelector`.
   private var firstTap: Bool
-  private(set) var visibleHolidayCategories: [HolidayCategory] = []
+  @Published private(set) var visibleHolidayCategories: [HolidayCategory] = []
 
   init(
     today: Today,
@@ -85,7 +90,12 @@ final class CalendarScreenViewModel {
     departurePlaceholder: String? = nil,
     returnPlaceholder: String? = nil,
     isDismissEndEnabled: Bool = true,
-    showPlusIconForReturn: Bool = true)
+    showPlusIconForReturn: Bool = true,
+    minimumDay: CalDate? = nil,
+    returnTapBeforeStart: CalendarReturnTapBeforeStart = .ignored,
+    clearBehavior: CalendarClearBehavior = .contextual,
+    dateFormat: String? = nil,
+    strings: CalendarStrings = CalendarStrings())
   {
     self.today = today
     self.selectedRange = initialRange
@@ -111,6 +121,11 @@ final class CalendarScreenViewModel {
     self.returnPlaceholder = returnPlaceholder
     self.isDismissEndEnabled = isDismissEndEnabled
     self.showPlusIconForReturn = showPlusIconForReturn
+    self.minimumDay = max(today.date, minimumDay ?? today.date)
+    self.returnTapBeforeStart = returnTapBeforeStart
+    self.clearBehavior = clearBehavior
+    self.dateFormat = dateFormat
+    self.strings = strings
     self.firstTap = !isReturn
     // Seed the legend for the initially visible month; refined by `updateVisibleMonths` on scroll.
     updateVisibleMonths(first: firstVisibleMonth.yearMonth, last: firstVisibleMonth.yearMonth)
@@ -125,10 +140,11 @@ final class CalendarScreenViewModel {
 
   // MARK: - Tap state machine (port of CalendarRangeSelector.onDayClicked)
 
-  /// `true` when [date] may be tapped: not before today and not after the max selectable date.
-  /// (HorizonCalendar only vends in-month days, so the `DayPosition.MonthDate` check is implicit.)
+  /// `true` when [date] may be tapped: not before the first selectable day (today, or a later
+  /// `minimumDate`) and not after the max selectable date. (HorizonCalendar only vends in-month
+  /// days, so the `DayPosition.MonthDate` check is implicit.)
   func isSelectable(_ date: CalDate) -> Bool {
-    if date.isBefore(today.date) { return false }
+    if date.isBefore(minimumDay) { return false }
     if let max = maxSelectableDate.date, date.isAfter(max) { return false }
     if blockedDates.contains(date) { return false }
     return true
@@ -164,10 +180,15 @@ final class CalendarScreenViewModel {
       firstTap = false
       next = SelectedRange(start: date)
     } else if lockStart, let locked = lockedStart {
-      // Start is locked: only ever move the end (when valid), never the start. Taps before the
-      // locked start, or that violate min/max nights / span a blocked day, are ignored.
-      next = (!date.isBefore(locked) && isValidEnd(start: locked, end: date))
-        ? current.with(end: date) : current
+      // Start is locked: only ever move the end (when valid), never the start. A tap before the
+      // locked start is ignored — or, with `.sameDay`, makes a same-day trip. Taps that violate
+      // min/max nights or span a blocked day are ignored.
+      if date.isBefore(locked) {
+        next = returnTapBeforeStart == .sameDay && isValidEnd(start: locked, end: locked)
+          ? current.with(end: locked) : current
+      } else {
+        next = isValidEnd(start: locked, end: date) ? current.with(end: date) : current
+      }
     } else if current.isPartial, let s = current.start, !date.isBefore(s) {
       // Closing an open range — only when the end is valid; otherwise keep the open range so the
       // user can pick a different end.
@@ -212,7 +233,7 @@ final class CalendarScreenViewModel {
     let minDate: CalDate? = lockStart ? r.start : nil
     let maxDate = maxSelectableDate.date
 
-    var isDisabled = date.isBefore(today.date)
+    var isDisabled = date.isBefore(minimumDay)
     if let minDate, date.isBefore(minDate) { isDisabled = true }
     if let maxDate, date.isAfter(maxDate) { isDisabled = true }
     if blockedDates.contains(date) { isDisabled = true }
@@ -256,13 +277,16 @@ final class CalendarScreenViewModel {
   // MARK: - Footer / top-bar actions (port of CalendarScreen callbacks)
 
   /// Whether the "Clear" button is enabled.
-  var clearEnabled: Bool { lockStart ? selectedRange.end != nil : selectedRange.start != nil }
+  var clearEnabled: Bool {
+    lockStart && clearBehavior == .contextual ? selectedRange.end != nil : selectedRange.start != nil
+  }
   /// Whether the "Apply" button is enabled.
   var applyEnabled: Bool { selectedRange.start != nil }
 
-  /// Footer "Clear": on the return screen only the end is cleared; otherwise the whole range.
+  /// Footer "Clear": on the return screen only the end is cleared (`.contextual`); otherwise — or
+  /// always with `.all` — the whole range.
   func clear() {
-    selectedRange = lockStart ? selectedRange.with(end: nil) : SelectedRange()
+    selectedRange = lockStart && clearBehavior == .contextual ? selectedRange.with(end: nil) : SelectedRange()
   }
 
   /// Top-bar return-date dismiss.

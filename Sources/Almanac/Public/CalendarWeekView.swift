@@ -13,7 +13,7 @@ import SwiftUI
 ///       selectedDay = result.goingDate
 ///     }
 public struct CalendarWeekView: View {
-  @State private var viewModel: CalendarScreenViewModel
+  @StateObject private var viewModel: CalendarScreenViewModel
   private let controller: CalendarController?
   private let onSelectionChange: ((CalendarPickerResult) -> Void)?
   private let showsTitle: Bool
@@ -43,7 +43,7 @@ public struct CalendarWeekView: View {
     let upper = CalDate(vm.endMonth.yearMonth.lastDayDate(in: calendar), in: calendar)
     let starts = WeekMath.weekStarts(from: lower, to: upper, calendar: calendar)
 
-    _viewModel = State(initialValue: vm)
+    _viewModel = StateObject(wrappedValue: vm)
     self.controller = controller
     self.onSelectionChange = onSelectionChange
     self.showsTitle = showsTitle
@@ -88,7 +88,7 @@ public struct CalendarWeekView: View {
       }
     }
     .onDisappear { controller?.scrollHandler = nil }
-    .onChange(of: viewModel.selectedRange) { _, newValue in
+    .onChange(of: viewModel.selectedRange) { newValue in
       onSelectionChange?(CalendarPickerResult(range: newValue))
     }
   }

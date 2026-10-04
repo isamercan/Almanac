@@ -34,7 +34,7 @@ public enum CalendarPickerHosting {
   {
     await withCheckedContinuation { continuation in
       var didResume = false
-      func finish(_ result: CalendarPickerResult?) {
+      @MainActor func finish(_ result: CalendarPickerResult?) {
         guard !didResume else { return }
         didResume = true
         presenter.dismiss(animated: true)

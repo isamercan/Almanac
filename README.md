@@ -50,11 +50,11 @@ Swift Package Manager — in Xcode, *File ▸ Add Package Dependencies…* and e
 `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/isamercan/Almanac.git", from: "0.2.0")
+.package(url: "https://github.com/isamercan/Almanac.git", from: "0.3.0")
 ```
 
 Then add `"Almanac"` to your target's dependencies and `import Almanac`.
-Requires **iOS 17+**. (SPM only — resources use `Bundle.module`; CocoaPods is not supported.)
+Requires **iOS 15.6+**. (SPM only — resources use `Bundle.module`; CocoaPods is not supported.)
 
 ## Layout
 
@@ -135,14 +135,16 @@ Plus the two upstream variants: **2 · Highlight** (modern Airbnb continuous-sel
 
 ## Dependencies (SPM)
 
-- [Airbnb HorizonCalendar](https://github.com/airbnb/HorizonCalendar) `2.0.0` — the scrolling
-  month-grid engine. Declared in `Package.swift`; resolved transitively by the app.
+- [Airbnb HorizonCalendar](https://github.com/airbnb/HorizonCalendar) `1.16.0..<3.0.0` — the
+  scrolling month-grid engine, hosted through its UIKit `CalendarView` (same API in 1.16 and 2.x), so
+  an app already pinning HorizonCalendar 1.x resolves together with Almanac. Declared in
+  `Package.swift`; resolved transitively by the app.
 - [pointfreeco/swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing)
   `1.17.0` — **test-only**, for component image snapshots.
 
 ## Requirements
 
-- Xcode 16+ (developed/verified on Xcode 26), iOS 17+ simulator.
+- Xcode 16+ (developed/verified on Xcode 26); iOS 15.6+ (the custom time-wheel drum needs iOS 17 — before it the system wheel).
 
 ## Build & run
 
@@ -244,6 +246,22 @@ CalendarGridView(configuration: CalendarPickerConfiguration(localeTag: "tr")) { 
 var bare = CalendarPickerConfiguration(localeTag: "tr")
 bare.chrome = CalendarChrome(showsTitleBar: false, showsLegend: false, showsClearButton: false)
 CalendarRangePickerView.rangeSelector(configuration: bare, onApply: { _ in })
+```
+
+### Booking rules
+
+A travel booking's calendar — departure, an optional return — can opt into stricter rules:
+
+```swift
+var flight = CalendarPickerConfiguration(
+  goingDate: departure, returnDate: back, isReturn: opensOnReturn,
+  maxSelectableDate: lastBookableDay, holidays: specialDays, localeTag: "tr",
+  minimumDate: opensOnReturn ? departure : nil,   // a return can't be before the departure
+  returnTapBeforeStart: .sameDay,                 // tapping before the departure = same-day trip
+  clearBehavior: .all,                            // "Temizle" clears both, with any date selected
+  dateFormat: "d MMMM yyyy")
+var style = CalendarStyle.standard
+style.metrics.sameDayStyle = .outerRing()        // same day: smaller fill inside a ring
 ```
 
 The standalone drum time pickers are `TimeWheel24` and `TimeWheelAmPm` (tick haptics on by default;

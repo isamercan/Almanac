@@ -38,7 +38,7 @@ enum L10n {
   /// Resolves [key] for [locale], picking the matching `.lproj` inside the Almanac bundle and
   /// falling back to the bundle default (tr). Independent of the host app's locale plumbing.
   static func string(_ key: String, locale: Locale) -> String {
-    let lang = locale.language.languageCode?.identifier ?? "tr"
+    let lang = locale.languageCode ?? "tr"
     if let path = Bundle.module.path(forResource: lang, ofType: "lproj"),
        let bundle = Bundle(path: path) {
       return bundle.localizedString(forKey: key, value: key, table: nil)

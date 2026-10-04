@@ -12,8 +12,8 @@ import HorizonCalendar
 ///       selectedRange = result   // result.goingDate / result.returnDate
 ///     }
 public struct CalendarGridView: View {
-  @State private var viewModel: CalendarScreenViewModel
-  @State private var proxy = CalendarViewProxy()
+  @StateObject private var viewModel: CalendarScreenViewModel
+  @StateObject private var proxy = CalendarScrollProxy()
   private let controller: CalendarController?
   private let onSelectionChange: ((CalendarPickerResult) -> Void)?
 
@@ -22,7 +22,7 @@ public struct CalendarGridView: View {
     controller: CalendarController? = nil,
     onSelectionChange: ((CalendarPickerResult) -> Void)? = nil)
   {
-    _viewModel = State(initialValue: configuration.makeViewModel())
+    _viewModel = StateObject(wrappedValue: configuration.makeViewModel())
     self.controller = controller
     self.onSelectionChange = onSelectionChange
   }
@@ -33,19 +33,17 @@ public struct CalendarGridView: View {
         let calendar = viewModel.calendar
         proxy.scrollToMonth(
           containing: viewModel.firstVisibleMonth.yearMonth.firstDayDate(in: calendar),
-          scrollPosition: .firstFullyVisiblePosition,
           animated: false)
         controller?.scrollHandler = { date, animated in
           let month = CalDate(date, in: calendar).calMonth
             .coerced(in: viewModel.startMonth.yearMonth, viewModel.endMonth.yearMonth)
           proxy.scrollToMonth(
             containing: month.firstDayDate(in: calendar),
-            scrollPosition: .firstFullyVisiblePosition,
             animated: animated)
         }
       }
       .onDisappear { controller?.scrollHandler = nil }
-      .onChange(of: viewModel.selectedRange) { _, newValue in
+      .onChange(of: viewModel.selectedRange) { newValue in
         onSelectionChange?(CalendarPickerResult(range: newValue))
       }
   }
