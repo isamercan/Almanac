@@ -25,23 +25,23 @@ struct CalendarFooter: View {
   var showsLegend: Bool = true
   var showsClearButton: Bool = true
   var showsApplyButton: Bool = true
+  /// Words in place of the bundled "Clear" / "Apply"; nil keeps them.
+  var clearTitle: String? = nil
+  var applyTitle: String? = nil
   @Environment(\.calendarStyle) private var style
   @Environment(\.calendarContent) private var content
 
   private var theme: CalendarTheme { style.theme }
   private var metrics: CalendarMetrics { style.metrics }
 
-  private var footerShape: UnevenRoundedRectangle {
-    UnevenRoundedRectangle(
-      topLeadingRadius: metrics.footerCornerRadius,
-      bottomLeadingRadius: 0,
-      bottomTrailingRadius: 0,
-      topTrailingRadius: metrics.footerCornerRadius)
+  private var footerShape: TopRoundedRectangle {
+    TopRoundedRectangle(radius: metrics.footerCornerRadius)
   }
 
   var body: some View {
     VStack(spacing: 0) {
-      if showsLegend {
+      // No special day in the visible months: no legend, and no gap where it would be.
+      if showsLegend && !holidayCategories.isEmpty {
         if let custom = content.legend {
           custom(holidayCategories)
         } else {
@@ -72,7 +72,7 @@ struct CalendarFooter: View {
 
   private var clearButton: some View {
     Button(action: onClear) {
-      Text(L10n.string(L10n.Key.clear, locale: locale))
+      Text(clearTitle ?? L10n.string(L10n.Key.clear, locale: locale))
         .calendarTextStyle(style.typography.button)
         .foregroundStyle(clearEnabled ? theme.ink : theme.disabledButtonContent)
         .frame(maxWidth: .infinity)
@@ -90,7 +90,7 @@ struct CalendarFooter: View {
 
   private var applyButton: some View {
     Button(action: onApply) {
-      Text(L10n.string(L10n.Key.apply, locale: locale))
+      Text(applyTitle ?? L10n.string(L10n.Key.apply, locale: locale))
         .calendarTextStyle(style.typography.button)
         .foregroundStyle(applyEnabled ? theme.onInk : theme.disabledButtonContent)
         .frame(maxWidth: .infinity)
@@ -100,5 +100,26 @@ struct CalendarFooter: View {
     .buttonStyle(.plain)
     .disabled(!applyEnabled)
     .accessibilityIdentifier("calendar.apply")
+  }
+}
+
+/// A rectangle with its two top corners rounded — the footer card. (`UnevenRoundedRectangle` needs
+/// iOS 16.)
+struct TopRoundedRectangle: Shape {
+  let radius: CGFloat
+
+  func path(in rect: CGRect) -> Path {
+    let r = min(radius, rect.width / 2, rect.height)
+    var path = Path()
+    path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+    path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + r))
+    path.addArc(center: CGPoint(x: rect.minX + r, y: rect.minY + r), radius: r,
+                startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+    path.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
+    path.addArc(center: CGPoint(x: rect.maxX - r, y: rect.minY + r), radius: r,
+                startAngle: .degrees(270), endAngle: .degrees(0), clockwise: false)
+    path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+    path.closeSubpath()
+    return path
   }
 }

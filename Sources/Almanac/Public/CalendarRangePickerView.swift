@@ -4,7 +4,7 @@ import SwiftUI
 /// Configure it with `CalendarPickerConfiguration` and receive the applied range via `onApply`;
 /// back and close both invoke `onCancel`.
 public struct CalendarRangePickerView: View {
-  @State private var viewModel: CalendarScreenViewModel
+  @StateObject private var viewModel: CalendarScreenViewModel
   /// In-progress selection persisted for state restoration (opt-in via `restorationID`).
   @SceneStorage private var storedRange: String
   private let persists: Bool
@@ -21,7 +21,7 @@ public struct CalendarRangePickerView: View {
     onCancel: @escaping () -> Void = {},
     onSelectionChange: ((CalendarPickerResult) -> Void)? = nil)
   {
-    _viewModel = State(initialValue: configuration.makeViewModel())
+    _viewModel = StateObject(wrappedValue: configuration.makeViewModel())
     self.persists = configuration.restorationID != nil
     _storedRange = SceneStorage(
       wrappedValue: "",
@@ -45,7 +45,7 @@ public struct CalendarRangePickerView: View {
         viewModel.restore(restored)
       }
     }
-    .onChange(of: viewModel.selectedRange) { _, newValue in
+    .onChange(of: viewModel.selectedRange) { newValue in
       if persists { storedRange = newValue.sceneEncoded }
       onSelectionChange?(CalendarPickerResult(range: newValue))
     }

@@ -3,7 +3,7 @@
 Thanks for helping improve Almanac.
 
 ## Setup
-- Xcode 16+ (developed on Xcode 26), iOS 17 simulator.
+- Xcode 16+ (developed on Xcode 26), an iOS simulator (the library supports iOS 15.6+).
 - Library: repo-root Swift package (`Package.swift`, sources under `Sources/Almanac/`). Example app +
   UI tests: `Demo/calendar-ios.xcodeproj`.
 

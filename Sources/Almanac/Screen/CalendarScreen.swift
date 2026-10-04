@@ -8,7 +8,7 @@ import HorizonCalendar
 /// All inputs are already parsed/resolved by the caller (see `CalendarRangePickerView`), so this
 /// view stays host-agnostic and previewable.
 struct CalendarScreen: View {
-  let viewModel: CalendarScreenViewModel
+  @ObservedObject var viewModel: CalendarScreenViewModel
   var controller: CalendarController? = nil
   var onBack: () -> Void
   var onClose: () -> Void
@@ -16,7 +16,7 @@ struct CalendarScreen: View {
 
   @Environment(\.calendarStyle) private var style
   @Environment(\.calendarContent) private var content
-  @State private var proxy = CalendarViewProxy()
+  @StateObject private var proxy = CalendarScrollProxy()
   @State private var footerHeight: CGFloat = 0
   @State private var accessoryHeight: CGFloat = 0
 
@@ -38,7 +38,9 @@ struct CalendarScreen: View {
           showPlusIconForReturn: viewModel.showPlusIconForReturn,
           showsReturn: viewModel.showsReturn,
           showsTitleBar: chrome.showsTitleBar,
-          showsDateRow: chrome.showsDateRow)
+          showsDateRow: chrome.showsDateRow,
+          title: viewModel.strings.title,
+          dateFormat: viewModel.dateFormat)
       }
 
       ZStack(alignment: .bottom) {
@@ -74,7 +76,9 @@ struct CalendarScreen: View {
               applyEnabled: viewModel.applyEnabled,
               showsLegend: viewModel.showsLegend,
               showsClearButton: chrome.showsClearButton,
-              showsApplyButton: chrome.showsApplyButton)
+              showsApplyButton: chrome.showsApplyButton,
+              clearTitle: viewModel.strings.clear,
+              applyTitle: viewModel.strings.apply)
             .onPreferenceChange(FooterHeightKey.self) { footerHeight = $0 }
           }
         }
@@ -90,7 +94,6 @@ struct CalendarScreen: View {
       let calendar = viewModel.calendar
       proxy.scrollToMonth(
         containing: viewModel.firstVisibleMonth.yearMonth.firstDayDate(in: calendar),
-        scrollPosition: .firstFullyVisiblePosition,
         animated: false)
       // Wire the public controller's scroll(to:) to the HorizonCalendar proxy. Clamp the target
       // month into the visible range — HorizonCalendar fatalErrors if asked to scroll out of range.
@@ -99,7 +102,6 @@ struct CalendarScreen: View {
           .coerced(in: viewModel.startMonth.yearMonth, viewModel.endMonth.yearMonth)
         proxy.scrollToMonth(
           containing: targetMonth.firstDayDate(in: calendar),
-          scrollPosition: .firstFullyVisiblePosition,
           animated: animated)
       }
     }
@@ -149,7 +151,6 @@ struct CalendarScreen: View {
       .coerced(in: viewModel.startMonth.yearMonth, viewModel.endMonth.yearMonth)
     proxy.scrollToMonth(
       containing: target.firstDayDate(in: calendar),
-      scrollPosition: .firstFullyVisiblePosition,
       animated: true)
   }
 }

@@ -24,14 +24,18 @@ struct CalendarTopBar: View {
   var showsTitleBar: Bool = true
   /// Show the departure → return summary row.
   var showsDateRow: Bool = true
+  /// The title in place of the bundled "Select Date"; nil keeps it.
+  var title: String? = nil
+  /// A fixed date pattern for the row; nil ⇒ the locale's long style.
+  var dateFormat: String? = nil
   @Environment(\.calendarStyle) private var style
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
   private var departureLabel: String? {
-    departureDate.date.map { CalendarFormatting.longDate($0, locale: locale, calendar: calendar) }
+    departureDate.date.map { CalendarFormatting.longDate($0, locale: locale, calendar: calendar, format: dateFormat) }
   }
   private var returnLabel: String? {
-    returnDate.date.map { CalendarFormatting.longDate($0, locale: locale, calendar: calendar) }
+    returnDate.date.map { CalendarFormatting.longDate($0, locale: locale, calendar: calendar, format: dateFormat) }
   }
 
   var body: some View {
@@ -42,7 +46,7 @@ struct CalendarTopBar: View {
           iconButton(systemName: "chevron.left", boxSize: 32, iconSize: 16,
                      accessibility: L10n.string(L10n.Key.back, locale: locale),
                      identifier: "calendar.back", action: onBack)
-          Text(L10n.string(L10n.Key.selectDatePrompt, locale: locale))
+          Text(title ?? L10n.string(L10n.Key.selectDatePrompt, locale: locale))
             .calendarTextStyle(style.typography.topBarTitle)
             .foregroundStyle(style.theme.ink)
             .frame(maxWidth: .infinity)

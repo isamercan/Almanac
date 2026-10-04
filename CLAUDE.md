@@ -34,7 +34,8 @@ The following rules are the heart of the component and are covered by `Tests/Alm
 them only with an accompanying test:
 
 - The day-tap selection state machine (`firstTap`, `lockStart`, partial-close, restart).
-- Selectable/disabled rules (`< today`, `< minDate`, `> maxDate`; `minDate = lockStart ? start : nil`).
+- Selectable/disabled rules (`< max(today, minimumDate)`, `< minDate`, `> maxDate`; `minDate = lockStart ? start : nil`).
+- Opt-in booking rules (`returnTapBeforeStart`, `clearBehavior`, initial inverted range dropped, empty legend hidden).
 - Month bounds (`startMonth`, `endMonth` from `maxSelectableDate`, `firstVisibleMonth` clamping).
 - Result mapping (`start == nil` ⇒ `end` forced `nil`).
 - Holiday dot/legend derivation (last-entry-wins per date; per-month `distinctBy description`;
@@ -47,12 +48,12 @@ them only with an accompanying test:
 
 | Concern | Choice |
 |---|---|
-| UI | SwiftUI (iOS 17+) |
-| State / logic | MVVM with `@Observable` view models; state hoisted to the screen |
+| UI | SwiftUI (iOS 15.6+; the time-wheel drum needs iOS 17, the system wheel before it) |
+| State / logic | MVVM with `ObservableObject` view models; state hoisted to the screen |
 | Async/reactivity | `async/await`, `AsyncStream`, Combine where it fits |
 | Persistence | **None.** State survival via `@State` + `@SceneStorage` (epoch-day encoding) |
 | Dates | `CalDate`/`CalMonth` value types over an injectable `Calendar` (TZ-stable); bridged to `Date`/`DayComponents` at the HorizonCalendar boundary |
-| Calendar grid | **Airbnb HorizonCalendar** (SPM, v2.0.0) — `CalendarViewRepresentable` |
+| Calendar grid | **Airbnb HorizonCalendar** (SPM, `1.16.0..<3.0.0`) — its UIKit `CalendarView` in Almanac's own `CalendarHost` (`UIViewRepresentable`); never the 2.x-only SwiftUI wrapper |
 | Icons | SF Symbols |
 | Haptics | `UIImpactFeedbackGenerator` (day tap), `UISelectionFeedbackGenerator` (wheel tick) |
 | Localization | `.strings` (tr/en/ar) + `Locale`-driven `DateFormatter`; BCP-47 override supported |
@@ -126,7 +127,7 @@ Input dates use `ETSCalendarDate(day, month, year)` / `HolidayEntry(dates, color
   (from repo root), or `swift test`.
 - Demo app: `cd Demo && xcodebuild -scheme CalendarDemo -project calendar-ios.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 17' build`,
   or open `Demo/calendar-ios.xcodeproj` in Xcode and run the `CalendarDemo` scheme.
-- Target: iOS 17, simulator (no signing).
+- Target: iOS 15.6+, simulator (no signing). Test against HorizonCalendar 1.16.0 and the latest 2.x.
 
 ---
 

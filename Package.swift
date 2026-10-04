@@ -5,13 +5,13 @@ let package = Package(
   name: "Almanac",
   defaultLocalization: "tr",
   platforms: [
-    .iOS(.v17),
+    .iOS("15.6"),
   ],
   products: [
     .library(name: "Almanac", targets: ["Almanac"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/airbnb/HorizonCalendar.git", from: "2.0.0"),
+    .package(url: "https://github.com/airbnb/HorizonCalendar.git", "1.16.0"..<"3.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.17.0"),
   ],
   targets: [

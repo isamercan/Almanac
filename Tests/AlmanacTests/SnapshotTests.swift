@@ -69,4 +69,42 @@ final class SnapshotTests: XCTestCase {
       onClose: {})
     assertImage(bar, width: 360, height: 140)
   }
+
+  /// 0.3.0: a same-day range drawn as Ucuzabilet's travel calendar draws it.
+  func testSameDayOuterRing() {
+    var style = CalendarStyle.standard
+    style.metrics.sameDayStyle = .outerRing()
+    let row = HStack(spacing: 2) {
+      CalendarDayIndicator(day: 24, isSelected: true, isToday: false, isHoliday: false, isSameDay: true, style: style)
+      CalendarDayIndicator(day: 25, isSelected: true, isToday: false, isHoliday: false, style: style)
+    }
+    assertImage(row, width: 120, height: 60)
+  }
+
+  /// 0.3.0: no special day in view — no legend and no gap, only the buttons.
+  func testFooterWithoutLegend() {
+    let footer = CalendarFooter(
+      holidayCategories: [],
+      locale: locale,
+      onClear: {},
+      onApply: {},
+      clearEnabled: true,
+      applyEnabled: true,
+      clearTitle: "Temizle",
+      applyTitle: "Uygula")
+    assertImage(footer, width: 360, height: 100)
+  }
+
+  /// 0.3.0: the host's title and date pattern.
+  func testTopBarWithTitleAndPattern() {
+    let bar = CalendarTopBar(
+      departureDate: SelectedDay(CalDate(year: 2026, month: 10, day: 9)),
+      returnDate: SelectedDay(nil),
+      locale: locale,
+      onBack: {},
+      onClose: {},
+      title: "Tarih Seçin",
+      dateFormat: "d MMMM yyyy")
+    assertImage(bar, width: 360, height: 140)
+  }
 }

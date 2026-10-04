@@ -47,7 +47,7 @@ public struct CalendarBrowseView: View {
   private var controller: CalendarController { externalController ?? internalController }
   private var calendar: Calendar { configuration.calendar }
   private var locale: Locale { configuration.locale }
-  private var isRTL: Bool { locale.language.characterDirection == .rightToLeft }
+  private var isRTL: Bool { Locale.characterDirection(forLanguage: locale.languageCode ?? "") == .rightToLeft }
 
   /// The grid's navigable month window — the year overview aligns to this so it never offers a month
   /// the grid would silently clamp away.

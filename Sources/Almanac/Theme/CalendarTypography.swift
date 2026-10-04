@@ -50,10 +50,16 @@ private struct CalendarTextStyleModifier: ViewModifier {
     _scaledSize = ScaledMetric(wrappedValue: style.size, relativeTo: style.relativeTo)
   }
 
+  @ViewBuilder
   func body(content: Content) -> some View {
-    content
-      .font(.system(size: scaledSize, weight: style.weight))
-      .tracking(style.tracking)
+    if #available(iOS 16, *) {
+      content
+        .font(.system(size: scaledSize, weight: style.weight))
+        .tracking(style.tracking)
+    } else {
+      // Letter spacing on any view needs iOS 16; before it, the font alone.
+      content.font(.system(size: scaledSize, weight: style.weight))
+    }
   }
 }
 

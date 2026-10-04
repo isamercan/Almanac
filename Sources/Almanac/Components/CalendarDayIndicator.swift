@@ -28,7 +28,13 @@ struct CalendarDayIndicator: View {
     return isDisabled ? theme.line : theme.ink
   }
 
-  private var selectionShape: AnyShape { metrics.daySelectionShape.anyShape }
+  /// The fill's scale: smaller inside the outer ring for a same-day range drawn `.outerRing`.
+  private var fillScale: CGFloat {
+    if isSameDay, case let .outerRing(scale, _) = metrics.sameDayStyle { return scale }
+    return 1
+  }
+
+  private var selectionShape: CalendarDayShapeView { CalendarDayShapeView(kind: metrics.daySelectionShape) }
 
   private var daySquare: some View {
     ZStack {
@@ -38,15 +44,23 @@ struct CalendarDayIndicator: View {
 
       selectionShape
         .fill(active ? circleColor : .clear)
-        .scaleEffect(active ? 1 : 0)
+        .scaleEffect(active ? fillScale : 0)
         .opacity(active ? 1 : 0)
 
       if isSameDay {
-        selectionShape
-          .stroke(theme.onInk, lineWidth: metrics.sameDayRingWidth)
-          .padding(3)
-          .scaleEffect(active ? 1 : 0)
-          .opacity(active ? 1 : 0)
+        switch metrics.sameDayStyle {
+        case .innerRing:
+          selectionShape
+            .stroke(theme.onInk, lineWidth: metrics.sameDayRingWidth)
+            .padding(3)
+            .scaleEffect(active ? 1 : 0)
+            .opacity(active ? 1 : 0)
+        case .outerRing(_, let ringWidth):
+          selectionShape
+            .stroke(theme.ink, lineWidth: ringWidth)
+            .scaleEffect(active ? 1 : 0)
+            .opacity(active ? 1 : 0)
+        }
       }
 
       Text("\(day)")

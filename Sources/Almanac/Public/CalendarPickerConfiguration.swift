@@ -55,6 +55,21 @@ public struct CalendarPickerConfiguration {
   /// Whether the empty return shows a "+" icon. (Default: true.)
   public var showPlusIconForReturn: Bool
 
+  // MARK: Booking rules (opt-in; defaults preserve the standard behaviour)
+
+  /// The first selectable day; days before it (and before today) can't be tapped, and the month
+  /// window starts at its month. E.g. a return picker's departure day. nil ⇒ today.
+  public var minimumDate: Date?
+  /// What a tap before the start does while only the return can change. Default `.ignored`.
+  public var returnTapBeforeStart: CalendarReturnTapBeforeStart
+  /// What "Clear" clears. Default `.contextual`.
+  public var clearBehavior: CalendarClearBehavior
+  /// A fixed `DateFormatter` pattern for the date row (e.g. "d MMMM yyyy"), in `locale`.
+  /// nil ⇒ the locale's long date style.
+  public var dateFormat: String?
+  /// Words overriding the bundled ones (title, Clear, Apply).
+  public var strings: CalendarStrings
+
   public init(
     goingDate: Date? = nil,
     returnDate: Date? = nil,
@@ -75,7 +90,12 @@ public struct CalendarPickerConfiguration {
     departurePlaceholder: String? = nil,
     returnPlaceholder: String? = nil,
     isDismissEndEnabled: Bool = true,
-    showPlusIconForReturn: Bool = true)
+    showPlusIconForReturn: Bool = true,
+    minimumDate: Date? = nil,
+    returnTapBeforeStart: CalendarReturnTapBeforeStart = .ignored,
+    clearBehavior: CalendarClearBehavior = .contextual,
+    dateFormat: String? = nil,
+    strings: CalendarStrings = CalendarStrings())
   {
     self.goingDate = goingDate
     self.returnDate = returnDate
@@ -97,20 +117,33 @@ public struct CalendarPickerConfiguration {
     self.returnPlaceholder = returnPlaceholder
     self.isDismissEndEnabled = isDismissEndEnabled
     self.showPlusIconForReturn = showPlusIconForReturn
+    self.minimumDate = minimumDate
+    self.returnTapBeforeStart = returnTapBeforeStart
+    self.clearBehavior = clearBehavior
+    self.dateFormat = dateFormat
+    self.strings = strings
   }
 
   /// Resolved locale (BCP-47 tag or system default).
   public var locale: Locale { localeTag.map { Locale(identifier: $0) } ?? .current }
 
-  /// The visible/selectable month window every surface shares: from today's month through
-  /// `maxSelectableDate`'s month (or one year ahead when unset). The grid, week and browse views all
-  /// derive their bounds from this, so they agree on which months are navigable.
+  /// The first selectable day: the later of today and `minimumDate`.
+  func resolvedMinimumDay() -> CalDate {
+    let today = CalendarMath.today(in: calendar)
+    guard let minimumDate else { return today }
+    return max(today, CalDate(minimumDate, in: calendar))
+  }
+
+  /// The visible/selectable month window every surface shares: from the first selectable day's
+  /// month (today's, or `minimumDate`'s) through `maxSelectableDate`'s month (or one year after
+  /// today when unset). The grid, week and browse views all derive their bounds from this, so they
+  /// agree on which months are navigable.
   func resolvedMonthBounds() -> ClosedRange<CalMonth> {
     let today = CalendarMath.today(in: calendar)
-    let startMonth = today.calMonth
+    let startMonth = resolvedMinimumDay().calMonth
     let endMonth: CalMonth = maxSelectableDate
       .map { CalDate($0, in: calendar).calMonth.coercedAtLeast(startMonth) }
-      ?? startMonth.adding(years: 1, in: calendar)
+      ?? today.calMonth.adding(years: 1, in: calendar).coercedAtLeast(startMonth)
     return startMonth...endMonth
   }
 
@@ -124,16 +157,20 @@ public struct CalendarPickerConfiguration {
     let startMonth = monthBounds.lowerBound
     let endMonth = monthBounds.upperBound
 
-    // Clamp supplied dates into the selectable window [today, maxSelectable] so an out-of-range
+    // Clamp supplied dates into the selectable window [minimum, maxSelectable] so an out-of-range
     // initial value can't produce a selection outside the calendar.
+    let minimum = resolvedMinimumDay()
     func clamp(_ date: CalDate) -> CalDate {
       var result = date
-      if result < today { result = today }
+      if result < minimum { result = minimum }
       if let max = maxSelectable, result > max { result = max }
       return result
     }
     let going = goingDate.map { clamp(CalDate($0, in: calendar)) }
-    let ret = returnDate.map { clamp(CalDate($0, in: calendar)) }
+    // A return before the departure is dropped, not kept as an inverted range.
+    let ret = returnDate.map { clamp(CalDate($0, in: calendar)) }.flatMap { end in
+      going.map { end < $0 ? nil : end } ?? end
+    }
     let anchor: CalDate = (isReturn ? (ret ?? going) : going) ?? today
     let firstVisible = anchor.calMonth.coerced(in: startMonth, endMonth)
 
@@ -193,6 +230,11 @@ public struct CalendarPickerConfiguration {
       departurePlaceholder: departurePlaceholder,
       returnPlaceholder: returnPlaceholder,
       isDismissEndEnabled: isDismissEndEnabled,
-      showPlusIconForReturn: showPlusIconForReturn)
+      showPlusIconForReturn: showPlusIconForReturn,
+      minimumDay: minimum,
+      returnTapBeforeStart: returnTapBeforeStart,
+      clearBehavior: clearBehavior,
+      dateFormat: dateFormat,
+      strings: strings)
   }
 }

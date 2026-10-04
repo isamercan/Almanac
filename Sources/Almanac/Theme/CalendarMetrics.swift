@@ -14,6 +14,8 @@ public struct CalendarMetrics: Equatable, Sendable {
   public var selectionAnimationDuration: Double = 0.3
   public var todayRingWidth: CGFloat = 2
   public var sameDayRingWidth: CGFloat = 4
+  /// How a same-day range (start = end) is drawn. Default `.innerRing`.
+  public var sameDayStyle: CalendarSameDayStyle = .innerRing
   public var holidayDotSize: CGFloat = 4
   public var holidayDotBottomPadding: CGFloat = 8
   public var badgeFontSize: CGFloat = 9
@@ -48,4 +50,13 @@ public struct CalendarMetrics: Equatable, Sendable {
   public var legendItemSpacing: CGFloat = 4
 
   public init() {}
+}
+
+/// How a same-day range (start = end) is drawn.
+public enum CalendarSameDayStyle: Equatable, Sendable {
+  /// The full selection fill with a ring inside it (`sameDayRingWidth`, in `onInk`) — the default.
+  case innerRing
+  /// A smaller fill (`fillScale` of the cell) inside a ring at the cell's edge (`ringWidth`, in
+  /// `ink`) — Ucuzabilet's travel calendar.
+  case outerRing(fillScale: CGFloat = 0.75, ringWidth: CGFloat = 1.5)
 }

@@ -174,8 +174,10 @@ public struct CalendarStyleConfigurator: View {
         } label: { Label("Kopyala", systemImage: "doc.on.doc") }
         .buttonStyle(.bordered)
         #endif
-        ShareLink(item: style.generatedSwiftCode) { Label("Paylaş", systemImage: "square.and.arrow.up") }
-          .buttonStyle(.bordered)
+        if #available(iOS 16, *) {
+          ShareLink(item: style.generatedSwiftCode) { Label("Paylaş", systemImage: "square.and.arrow.up") }
+            .buttonStyle(.bordered)
+        }
         Spacer()
         Button("Sıfırla", role: .destructive) { withAnimation { style = .standard } }
       }

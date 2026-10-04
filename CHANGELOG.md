@@ -7,6 +7,32 @@ All notable changes to Almanac are documented here. Format follows
 
 _Nothing yet._
 
+## [0.3.0] - 2026-10-04
+
+### Changed
+- **iOS 15.6+** (was iOS 17). The view model is an `ObservableObject`; `AnyShape`,
+  `UnevenRoundedRectangle`, view-level `tracking` and `ShareLink` have iOS 15 paths. Before iOS 17 the
+  time wheel is the system wheel `Picker` (same items, value and accessibility); from iOS 17 it is the
+  custom drum as before.
+- **HorizonCalendar `1.16.0..<3.0.0`** (was `2.0.0`). The grid now hosts HorizonCalendar's UIKit
+  `CalendarView` through Almanac's own `UIViewRepresentable` (its API is the same in 1.16 and 2.x)
+  instead of the 2.x-only SwiftUI `CalendarViewRepresentable`, so an app that pins HorizonCalendar 1.x
+  can use Almanac. Tested on 1.16.0 and 2.0.0.
+- The footer's legend is gone — no gap either — when no special day is in the visible months.
+- An initial return before the departure is dropped rather than kept as an inverted range.
+
+### Added — booking rules (opt-in; defaults keep the standard behaviour)
+- `CalendarPickerConfiguration.minimumDate` — the first selectable day (e.g. a return picker's
+  departure); earlier days are disabled and the month window starts at its month.
+- `returnTapBeforeStart: .sameDay` — while only the return can change, a tap before the start makes
+  a same-day trip (default `.ignored`).
+- `clearBehavior: .all` — "Clear" always clears the whole range and is enabled with any date
+  (default `.contextual`).
+- `dateFormat` — a fixed pattern for the date row (e.g. `"d MMMM yyyy"`), in the configured locale.
+- `strings: CalendarStrings` — override the title, "Clear" and "Apply" words.
+- `CalendarMetrics.sameDayStyle: .outerRing(fillScale:ringWidth:)` — a same-day range as a smaller
+  fill inside an outer ring (default `.innerRing`, unchanged).
+
 ## [0.2.0] - 2026-06-25
 
 ### Added
