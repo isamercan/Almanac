@@ -14,7 +14,15 @@ public struct CalendarMetrics: Equatable, Sendable {
   public var selectionAnimationDuration: Double = 0.3
   public var todayRingWidth: CGFloat = 2
   public var sameDayRingWidth: CGFloat = 4
-  /// How a same-day range (start = end) is drawn. Default `.innerRing`.
+  /// Where the date row's labels sit.
+public enum CalendarDateRowAlignment: Equatable, Sendable {
+  /// Each label centred in its half.
+  case centered
+  /// The departure at the leading edge, the return at the trailing edge.
+  case edges
+}
+
+/// How a same-day range (start = end) is drawn. Default `.innerRing`.
   public var sameDayStyle: CalendarSameDayStyle = .innerRing
   public var holidayDotSize: CGFloat = 4
   public var holidayDotBottomPadding: CGFloat = 8
@@ -33,6 +41,16 @@ public struct CalendarMetrics: Equatable, Sendable {
   public var topBarHeight: CGFloat = 56
   public var topBarHorizontalPadding: CGFloat = 16
   public var dateRowVerticalPadding: CGFloat = 24
+  /// Where the departure and return labels sit: centred in their halves (default) or at the row's
+  /// edges, the arrow between them.
+  public var dateRowAlignment: CalendarDateRowAlignment = .centered
+  /// Side inset of the date row (used with `.edges`).
+  public var dateRowHorizontalPadding: CGFloat = 0
+  /// The back chevron's and the close cross's glyph sizes.
+  public var topBarBackIconSize: CGFloat = 16
+  public var topBarCloseIconSize: CGFloat = 16
+  /// The return label's clear button: a filled (default) or an outlined circled cross.
+  public var returnClearIconFilled: Bool = true
   public var dividerHeight: CGFloat = 1
   /// Drum/odometer flip duration for the departure/return labels.
   public var dateFlipDuration: Double = 0.4

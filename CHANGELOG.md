@@ -7,6 +7,14 @@ All notable changes to Almanac are documented here. Format follows
 
 _Nothing yet._
 
+## [0.3.1] - 2026-10-04
+
+### Added — top bar knobs (`CalendarMetrics`; defaults keep the stock look)
+- `dateRowAlignment: .edges` — the departure at the leading edge, the return at the trailing edge,
+  the arrow between them (default `.centered`), with `dateRowHorizontalPadding`.
+- `topBarBackIconSize`, `topBarCloseIconSize` — the chevron's and the cross's glyph sizes.
+- `returnClearIconFilled: false` — an outlined circled cross on the return label.
+
 ## [0.3.0] - 2026-10-04
 
 ### Changed

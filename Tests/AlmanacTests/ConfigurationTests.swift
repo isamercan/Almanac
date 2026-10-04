@@ -79,4 +79,14 @@ final class ConfigurationTests: XCTestCase {
     let d = CalDate(year: 2026, month: 6, day: 23)
     XCTAssertEqual(CalDate(epochDay: d.epochDay(in: istanbul), in: istanbul), d)
   }
+
+  /// The 0.3.1 top bar knobs leave the stock look as it was.
+  func testTopBarKnobsDefaultToTheStockLook() {
+    let metrics = CalendarMetrics()
+    XCTAssertEqual(metrics.dateRowAlignment, .centered)
+    XCTAssertEqual(metrics.dateRowHorizontalPadding, 0)
+    XCTAssertEqual(metrics.topBarBackIconSize, 16)
+    XCTAssertEqual(metrics.topBarCloseIconSize, 16)
+    XCTAssertTrue(metrics.returnClearIconFilled)
+  }
 }

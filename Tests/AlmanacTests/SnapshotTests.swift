@@ -107,4 +107,24 @@ final class SnapshotTests: XCTestCase {
       dateFormat: "d MMMM yyyy")
     assertImage(bar, width: 360, height: 140)
   }
+
+  /// A travel calendar's top bar: labels at the row's edges, smaller icons, an outlined clear.
+  func testTopBarAtTheEdges() {
+    var style = CalendarStyle.standard
+    style.metrics.dateRowAlignment = .edges
+    style.metrics.dateRowHorizontalPadding = 20
+    style.metrics.topBarBackIconSize = 12
+    style.metrics.topBarCloseIconSize = 14
+    style.metrics.returnClearIconFilled = false
+    let bar = CalendarTopBar(
+      departureDate: SelectedDay(CalDate(year: 2026, month: 10, day: 20)),
+      returnDate: SelectedDay(CalDate(year: 2026, month: 10, day: 24)),
+      locale: locale,
+      onBack: {},
+      onClose: {},
+      title: "Tarih Seçin",
+      dateFormat: "d MMMM yyyy")
+      .calendarStyle(style)
+    assertImage(bar, width: 360, height: 140)
+  }
 }
