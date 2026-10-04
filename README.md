@@ -50,7 +50,7 @@ Swift Package Manager — in Xcode, *File ▸ Add Package Dependencies…* and e
 `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/isamercan/Almanac.git", from: "0.3.0")
+.package(url: "https://github.com/isamercan/Almanac.git", from: "0.3.1")
 ```
 
 Then add `"Almanac"` to your target's dependencies and `import Almanac`.

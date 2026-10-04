@@ -43,7 +43,7 @@ struct CalendarTopBar: View {
       if showsTitleBar {
         // Title row
         HStack(spacing: 0) {
-          iconButton(systemName: "chevron.left", boxSize: 32, iconSize: 16,
+          iconButton(systemName: "chevron.left", boxSize: 32, iconSize: style.metrics.topBarBackIconSize,
                      accessibility: L10n.string(L10n.Key.back, locale: locale),
                      identifier: "calendar.back", action: onBack)
           Text(title ?? L10n.string(L10n.Key.selectDatePrompt, locale: locale))
@@ -51,7 +51,7 @@ struct CalendarTopBar: View {
             .foregroundStyle(style.theme.ink)
             .frame(maxWidth: .infinity)
             .multilineTextAlignment(.center)
-          iconButton(systemName: "xmark", boxSize: 20, iconSize: 16,
+          iconButton(systemName: "xmark", boxSize: 20, iconSize: style.metrics.topBarCloseIconSize,
                      accessibility: L10n.string(L10n.Key.close, locale: locale),
                      identifier: "calendar.close", action: onClose)
         }
@@ -79,7 +79,7 @@ struct CalendarTopBar: View {
       if showsReturn {
         HStack(spacing: 0) {
           departureView
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: isEdges ? .leading : .center)
 
           Image(systemName: "arrow.right")
             .resizable()
@@ -89,18 +89,22 @@ struct CalendarTopBar: View {
             .frame(width: 24, height: 24)
 
           returnView
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: isEdges ? .trailing : .center)
         }
         .padding(.vertical, style.metrics.dateRowVerticalPadding)
+        .padding(.horizontal, style.metrics.dateRowHorizontalPadding)
       } else {
         departureView
-          .frame(maxWidth: .infinity)
+          .frame(maxWidth: .infinity, alignment: isEdges ? .leading : .center)
           .padding(.vertical, style.metrics.dateRowVerticalPadding)
+          .padding(.horizontal, style.metrics.dateRowHorizontalPadding)
       }
     }
     .frame(maxWidth: .infinity)
     .background(style.theme.surface)
   }
+
+  private var isEdges: Bool { style.metrics.dateRowAlignment == .edges }
 
   // MARK: Departure (flips on change)
 
@@ -111,8 +115,8 @@ struct CalendarTopBar: View {
       Text(label)
         .calendarTextStyle(style.typography.dateLabel)
         .foregroundStyle(style.theme.ink)
-        .frame(maxWidth: .infinity)
-        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity, alignment: isEdges ? .leading : .center)
+        .multilineTextAlignment(isEdges ? .leading : .center)
         .id(label)
         .transition(.drumFlip)
     }
@@ -142,7 +146,7 @@ struct CalendarTopBar: View {
         if showDismiss {
           Spacer().frame(width: 4)
           Button(action: onClearReturn) {
-            Image(systemName: "xmark.circle.fill")
+            Image(systemName: style.metrics.returnClearIconFilled ? "xmark.circle.fill" : "xmark.circle")
               .resizable().scaledToFit().frame(width: 16)
               .foregroundStyle(style.theme.ink)
               .frame(width: 24, height: 24)
@@ -151,7 +155,7 @@ struct CalendarTopBar: View {
           .accessibilityLabel(L10n.string(L10n.Key.clearReturnDate, locale: locale))
         }
       }
-      .frame(maxWidth: .infinity)
+      .frame(maxWidth: .infinity, alignment: isEdges ? .trailing : .center)
       .id("\(label)#\(showDismiss)#\(showPlus)")
       .transition(.drumFlip)
     }
